@@ -1,16 +1,17 @@
 package ec.edu.espe.subasta.autos.api.DTO;
 
-import ec.edu.espe.subasta.autos.entity.UsuarioEntity;
-
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
 
-public class VehiculoDTO {
+public class AutoDTO {
     private Integer id_vendedor;
     private String marca;
     private String modelo;
     private Integer anio;
     private BigDecimal precio_base;
-    private EstadoVehiculo estado;
+    private boolean estado;
+    private Instant fecha;
 
     public Integer getId_vendedor() {
         return id_vendedor;
@@ -52,11 +53,19 @@ public class VehiculoDTO {
         this.precio_base = precio_base;
     }
 
-    public EstadoVehiculo getEstado() {
+    public boolean isEstado() {
         return estado;
     }
 
-    public void setEstado(EstadoVehiculo estado) {
+    public void setEstado(boolean estado) {
         this.estado = estado;
+    }
+
+    public Instant getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(Instant fecha) {
+        this.fecha = fecha;
     }
 }

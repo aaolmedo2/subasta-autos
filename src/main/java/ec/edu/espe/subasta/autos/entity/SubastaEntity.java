@@ -3,7 +3,11 @@ package ec.edu.espe.subasta.autos.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
@@ -12,49 +16,32 @@ import java.time.Instant;
 @Table(name = "subastas")
 public class SubastaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "subastas_id_gen")
+    @SequenceGenerator(name = "subastas_id_gen", sequenceName = "subastas_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "fecha_inicio")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "auto_id")
+    private AutoEntity auto;
+
+    @Column(name = "fecha_inicio", nullable = false)
     private Instant fechaInicio;
 
-    @Column(name = "duracion")
-    private Integer duracion;
+    @Column(name = "fecha_fin", nullable = false)
+    private Instant fechaFin;
 
-    @Lob
-    @Column(name = "estado")
-    private String estado;
+    @Column(name = "precio_minimo", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioMinimo;
 
-    public Integer getId() {
-        return id;
-    }
+    @ColumnDefault("true")
+    @Column(name = "activa")
+    private Boolean activa;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "ganador_id")
+    private ec.edu.espe.subasta.autos.entity.UsuarioEntity ganador;
 
-    public Integer getDuracion() {
-        return duracion;
-    }
-
-    public void setDuracion(Integer duracion) {
-        this.duracion = duracion;
-    }
-
-    public Instant getFechaInicio() {
-        return fechaInicio;
-    }
-
-    public void setFechaInicio(Instant fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
 }
