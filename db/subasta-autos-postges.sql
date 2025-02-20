@@ -2,10 +2,20 @@ CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    contraseña_hash VARCHAR(255) NOT NULL,
-    rol VARCHAR(50) NOT NULL CHECK (rol IN ('VENDEDOR', 'COMPRADOR', 'ADMINISTRADOR')),
+    contrasenia_hash VARCHAR(255) NOT NULL,
     activo BOOLEAN DEFAULT TRUE,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE usuarios_roles (
+    usuario_id INT REFERENCES usuarios(id) ON DELETE CASCADE,
+    rol_id INT REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (usuario_id, rol_id)
 );
 
 CREATE TABLE autos (
@@ -40,11 +50,11 @@ CREATE TABLE pujas (
 );
 
 -- Insertar un usuario vendedor
-INSERT INTO usuarios (nombre, email, contraseña_hash, rol) 
+INSERT INTO usuarios (nombre, email, contrasenia_hash, rol) 
 VALUES ('Juan Perez', 'juan@example.com', 'hashed_password', 'VENDEDOR');
 
 -- Insertar un auto
-INSERT INTO autos (marca, modelo, año, precio_base, vendedor_id) 
+INSERT INTO autos (marca, modelo, anio, precio_base, vendedor_id) 
 VALUES ('Toyota', 'Corolla', 2020, 15000.00, 1);
 
 -- Crear una subasta
@@ -54,3 +64,14 @@ VALUES (1, '2023-10-01 10:00:00', '2023-10-01 12:00:00', 16000.00);
 -- Insertar una puja
 INSERT INTO pujas (subasta_id, comprador_id, monto) 
 VALUES (1, 2, 16500.00);
+
+-- Insertar roles
+INSERT INTO roles (nombre) VALUES ('VENDEDOR'), ('COMPRADOR'), ('ADMINISTRADOR');
+
+-- Insertar usuario
+INSERT INTO usuarios (nombre, email, contrasenia_hash)
+VALUES ('Juan Perez', 'juan11@example.com', 'hashed_password');
+
+-- Asignar roles al usuario
+INSERT INTO usuarios_roles (usuario_id, rol_id)
+VALUES (9, 1), (9, 2); -- VENDEDOR y COMPRADOR
