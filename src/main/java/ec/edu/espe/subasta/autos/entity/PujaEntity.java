@@ -16,64 +16,26 @@ import java.time.Instant;
 @Table(name = "pujas")
 public class PujaEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pujas_id_gen")
+    @SequenceGenerator(name = "pujas_id_gen", sequenceName = "pujas_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "comprador_id")
-    private ec.edu.espe.subasta.autos.entity.UsuarioEntity comprador;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "subasta_id")
     private ec.edu.espe.subasta.autos.entity.SubastaEntity subasta;
 
-    @Column(name = "monto", precision = 10, scale = 2)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "comprador_id")
+    private ec.edu.espe.subasta.autos.entity.UsuarioEntity comprador;
+
+    @Column(name = "monto", nullable = false, precision = 10, scale = 2)
     private BigDecimal monto;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "fecha")
-    private Instant fecha;
+    @Column(name = "fecha_puja")
+    private Instant fechaPuja;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public UsuarioEntity getComprador() {
-        return comprador;
-    }
-
-    public void setComprador(UsuarioEntity comprador) {
-        this.comprador = comprador;
-    }
-
-    public SubastaEntity getSubasta() {
-        return subasta;
-    }
-
-    public void setSubasta(SubastaEntity subasta) {
-        this.subasta = subasta;
-    }
-
-    public BigDecimal getMonto() {
-        return monto;
-    }
-
-    public void setMonto(BigDecimal monto) {
-        this.monto = monto;
-    }
-
-    public Instant getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(Instant fecha) {
-        this.fecha = fecha;
-    }
 }

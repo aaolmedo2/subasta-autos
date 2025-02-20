@@ -5,33 +5,38 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 @Entity
 @Table(name = "usuarios")
 public class UsuarioEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuarios_id_gen")
+    @SequenceGenerator(name = "usuarios_id_gen", sequenceName = "usuarios_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "nombre", length = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "email", length = 100)
+    @Column(name = "email", nullable = false, length = 100)
     private String email;
 
-    @Column(name = "password_hash")
-    private String passwordHash;
+    @Column(name = "contrasenia_hash", nullable = false)
+    private String contraseniaHash;
 
-    @Lob
-    @Column(name = "rol")
+    @Column(name = "rol", nullable = false, length = 50)
     private String rol;
 
-    @ColumnDefault("1")
-    @Column(name = "estado")
-    private Boolean estado;
+    @ColumnDefault("true")
+    @Column(name = "activo")
+    private Boolean activo;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "fecha_registro")
+    private Instant fechaRegistro;
 
     public Integer getId() {
         return id;
@@ -57,12 +62,12 @@ public class UsuarioEntity {
         this.email = email;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getContraseniaHash() {
+        return contraseniaHash;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setContraseniaHash(String contraseniaHash) {
+        this.contraseniaHash = contraseniaHash;
     }
 
     public String getRol() {
@@ -73,11 +78,19 @@ public class UsuarioEntity {
         this.rol = rol;
     }
 
-    public Boolean getEstado() {
-        return estado;
+    public Boolean getActivo() {
+        return activo;
     }
 
-    public void setEstado(Boolean estado) {
-        this.estado = estado;
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
+
+    public Instant getFechaRegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFechaRegistro(Instant fechaRegistro) {
+        this.fechaRegistro = fechaRegistro;
     }
 }
