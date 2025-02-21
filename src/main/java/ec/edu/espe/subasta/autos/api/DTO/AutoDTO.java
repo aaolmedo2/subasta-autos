@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Date;
 
 public class AutoDTO {
+    private Integer id;
     private Integer id_vendedor;
     private String marca;
     private String modelo;
@@ -12,6 +13,14 @@ public class AutoDTO {
     private BigDecimal precio_base;
     private boolean estado;
     private Instant fecha;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public Integer getId_vendedor() {
         return id_vendedor;
