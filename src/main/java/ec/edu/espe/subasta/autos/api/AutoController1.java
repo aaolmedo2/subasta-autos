@@ -2,9 +2,7 @@ package ec.edu.espe.subasta.autos.api;
 
 
 import ec.edu.espe.subasta.autos.api.DTO.AutoDTO;
-import ec.edu.espe.subasta.autos.entity.AutoEntity;
 import ec.edu.espe.subasta.autos.exception.DeleteException;
-import ec.edu.espe.subasta.autos.exception.DocumentNotFoundException;
 import ec.edu.espe.subasta.autos.exception.InsertException;
 import ec.edu.espe.subasta.autos.exception.UpdateException;
 import ec.edu.espe.subasta.autos.service.AutoService;
@@ -14,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,12 +19,12 @@ import java.util.Map;
 @CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping("/api/vehiculo")
-public class AutoController {
+public class AutoController1 {
     private final AutoService autoService;
 
-    private static final Logger logger = LoggerFactory.getLogger(AutoController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AutoController1.class);
 
-    public AutoController(AutoService autoService) {
+    public AutoController1(AutoService autoService) {
         this.autoService = autoService;
     }
 
