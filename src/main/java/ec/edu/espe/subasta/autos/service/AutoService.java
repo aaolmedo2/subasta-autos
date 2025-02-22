@@ -118,28 +118,67 @@ public class AutoService {
     public List<AutoDTO> getAllVehicles() {
         try {
             List<AutoEntity> autoEntities = this.autoRepository.findAll();
-
-            // Convertir entidades a DTOs para hacer
-            List<AutoDTO> autoDTOs = autoEntities.stream()
-                    .map(autoEntity -> {
-
-                        AutoDTO autoDTO = new AutoDTO();
-
-                        autoDTO.setMarca(autoEntity.getMarca());
-                        autoDTO.setModelo(autoEntity.getModelo());
-                        autoDTO.setAnio(autoEntity.getAnio());
-                        autoDTO.setPrecio_base(autoEntity.getPrecioBase());
-                        autoDTO.setEstado(autoEntity.getVendido());
-                        autoDTO.setFecha(autoEntity.getFechaCreacion());
-
-                        return autoDTO;
-                    })
+            return autoEntities.stream()
+                    .map(this::convertToDTO)
                     .collect(Collectors.toList());
-
-            return autoDTOs;
-
         } catch (Exception e) {
+            logger.error("Error fetching all vehicles", e);
             throw new RuntimeException("Error al obtener los autos", e);
+        }
+    }
+
+    // New method for buyers to see available (unsold) vehicles
+    public List<AutoDTO> getAvailableVehicles() {
+        try {
+            List<AutoEntity> availableAutos = this.autoRepository.findByVendido(false);
+            return availableAutos.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Error fetching available vehicles", e);
+            throw new RuntimeException("Error al obtener los autos disponibles", e);
+        }
+    }
+
+    // New method to get vehicle details
+    public AutoDTO getVehicleById(Integer id) throws DocumentNotFoundException {
+        try {
+            AutoEntity auto = this.autoRepository.findById(id)
+                    .orElseThrow(() -> new DocumentNotFoundException("Auto no encontrado", AutoEntity.class.getName()));
+            return convertToDTO(auto);
+        } catch (Exception e) {
+            logger.error("Error fetching vehicle by id: {}", id, e);
+            throw new RuntimeException("Error al obtener el auto", e);
+        }
+    }
+
+    // Helper method to convert Entity to DTO
+    private AutoDTO convertToDTO(AutoEntity autoEntity) {
+        AutoDTO autoDTO = new AutoDTO();
+        autoDTO.setId(autoEntity.getId());
+        autoDTO.setId_vendedor(autoEntity.getVendedor().getId());
+        autoDTO.setMarca(autoEntity.getMarca());
+        autoDTO.setModelo(autoEntity.getModelo());
+        autoDTO.setAnio(autoEntity.getAnio());
+        autoDTO.setPrecio_base(autoEntity.getPrecioBase());
+        autoDTO.setEstado(autoEntity.getVendido());
+        autoDTO.setFecha(autoEntity.getFechaCreacion());
+        return autoDTO;
+    }
+
+    // Helper method to validate auto data
+    private void validateAutoData(AutoDTO autoDTO) throws InsertException {
+        if (autoDTO.getMarca() == null || autoDTO.getMarca().trim().isEmpty()) {
+            throw new InsertException("La marca es requerida", AutoEntity.class.getName());
+        }
+        if (autoDTO.getModelo() == null || autoDTO.getModelo().trim().isEmpty()) {
+            throw new InsertException("El modelo es requerido", AutoEntity.class.getName());
+        }
+        if (autoDTO.getAnio() == null || autoDTO.getAnio() < 1900) {
+            throw new InsertException("Año inválido", AutoEntity.class.getName());
+        }
+        if (autoDTO.getPrecio_base() == null || autoDTO.getPrecio_base() <= 0) {
+            throw new InsertException("Precio base inválido", AutoEntity.class.getName());
         }
     }
 
