@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -27,70 +27,11 @@ public class UsuarioEntity {
     @Column(name = "contrasenia_hash", nullable = false)
     private String contraseniaHash;
 
-    @Column(name = "rol", nullable = false, length = 50)
-    private String rol;
-
     @ColumnDefault("true")
     @Column(name = "activo")
     private Boolean activo;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "fecha_registro")
-    private Instant fechaRegistro;
+    private LocalDate fechaRegistro;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getContraseniaHash() {
-        return contraseniaHash;
-    }
-
-    public void setContraseniaHash(String contraseniaHash) {
-        this.contraseniaHash = contraseniaHash;
-    }
-
-    public String getRol() {
-        return rol;
-    }
-
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
-
-    public Boolean getActivo() {
-        return activo;
-    }
-
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
-    }
-
-    public Instant getFechaRegistro() {
-        return fechaRegistro;
-    }
-
-    public void setFechaRegistro(Instant fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
-    }
 }

@@ -7,8 +7,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -27,13 +26,13 @@ public class SubastaEntity {
     private AutoEntity auto;
 
     @Column(name = "fecha_inicio", nullable = false)
-    private Instant fechaInicio;
+    private LocalDate fechaInicio;
 
     @Column(name = "fecha_fin", nullable = false)
-    private Instant fechaFin;
+    private LocalDate fechaFin;
 
-    @Column(name = "precio_minimo", nullable = false, precision = 10, scale = 2)
-    private BigDecimal precioMinimo;
+    @Column(name = "precio_minimo", nullable = false)
+    private Float precioMinimo;
 
     @ColumnDefault("true")
     @Column(name = "activa")

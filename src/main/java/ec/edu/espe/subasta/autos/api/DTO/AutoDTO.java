@@ -2,6 +2,7 @@ package ec.edu.espe.subasta.autos.api.DTO;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Date;
 
 public class AutoDTO {
@@ -9,9 +10,9 @@ public class AutoDTO {
     private String marca;
     private String modelo;
     private Integer anio;
-    private BigDecimal precio_base;
+    private Float precio_base;
     private boolean estado;
-    private Instant fecha;
+    private LocalDate fecha;
 
     public Integer getId_vendedor() {
         return id_vendedor;
@@ -45,11 +46,11 @@ public class AutoDTO {
         this.anio = anio;
     }
 
-    public BigDecimal getPrecio_base() {
+    public Float getPrecio_base() {
         return precio_base;
     }
 
-    public void setPrecio_base(BigDecimal precio_base) {
+    public void setPrecio_base(Float precio_base) {
         this.precio_base = precio_base;
     }
 
@@ -61,11 +62,11 @@ public class AutoDTO {
         this.estado = estado;
     }
 
-    public Instant getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public void setFecha(Instant fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
     }
 }

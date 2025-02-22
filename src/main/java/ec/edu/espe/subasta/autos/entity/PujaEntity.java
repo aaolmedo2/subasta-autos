@@ -3,12 +3,10 @@ package ec.edu.espe.subasta.autos.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -31,11 +29,10 @@ public class PujaEntity {
     @JoinColumn(name = "comprador_id")
     private ec.edu.espe.subasta.autos.entity.UsuarioEntity comprador;
 
-    @Column(name = "monto", nullable = false, precision = 10, scale = 2)
-    private BigDecimal monto;
+    @Column(name = "monto", nullable = false)
+    private Float monto;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "fecha_puja")
-    private Instant fechaPuja;
+    private LocalDate fechaPuja;
 
 }
