@@ -2,6 +2,8 @@ package ec.edu.espe.subasta.autos.api;
 
 
 import ec.edu.espe.subasta.autos.api.DTO.AutoDTO;
+import ec.edu.espe.subasta.autos.exception.DeleteException;
+import ec.edu.espe.subasta.autos.exception.DocumentNotFoundException;
 import ec.edu.espe.subasta.autos.exception.InsertException;
 import ec.edu.espe.subasta.autos.service.AutoService;
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -25,7 +28,7 @@ public class AutoController {
         this.autoService = autoService;
     }
 
-    @PostMapping("/createVehiculo")
+    @PostMapping("/create")
     public ResponseEntity<?> createVehiculo(@RequestBody AutoDTO autoDTO) {
         try {
             autoService.create(autoDTO);
@@ -34,4 +37,51 @@ public class AutoController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    //update vehicle seller
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateVehicle(@PathVariable Integer id, @RequestBody AutoDTO autoDTO) {
+        try {
+            this.autoService.update(id, autoDTO);
+            return ResponseEntity.ok().body("Vehículo actualizado exitosamente");
+        } catch (DocumentNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Error: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el vehículo: " + e.getMessage());
+        }
+    }
+
+    // Admin endpoints
+    @GetMapping("/allVehicles")
+    public ResponseEntity<List<AutoDTO>> getAllVehicles() {
+        return ResponseEntity.ok(autoService.getAllVehicles());
+    }
+
+    // Delete vehicle
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteVehicle(@PathVariable Integer id) throws DeleteException {
+        autoService.delete(id);
+        return ResponseEntity.ok().build();
+    }
+
+    // Get all by seller
+    @GetMapping("/getAll/{vendedorId}")
+    public ResponseEntity<List<AutoDTO>> getVehiclesByVendedor(@PathVariable Long vendedorId) {
+        return ResponseEntity.ok(autoService.getVehiclesByVendedor(vendedorId));
+    }
+
+    // Buyer endpoints, for know what car its available
+    @GetMapping("/available")
+    public ResponseEntity<List<AutoDTO>> getAvailableVehicles() {
+        return ResponseEntity.ok(autoService.getAvailableVehicles());
+    }
+
+    // Common endpoints
+    @GetMapping("/{id}")
+    public ResponseEntity<AutoDTO> getVehicleById(@PathVariable Integer id) throws DocumentNotFoundException {
+        return ResponseEntity.ok(autoService.getVehicleById(id));
+    }
+
 }
