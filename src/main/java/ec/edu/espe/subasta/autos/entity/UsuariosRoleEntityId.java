@@ -2,7 +2,9 @@ package ec.edu.espe.subasta.autos.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 
@@ -11,6 +13,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @Embeddable
+@AllArgsConstructor
+@NoArgsConstructor
 public class UsuariosRoleEntityId implements java.io.Serializable {
     private static final long serialVersionUID = 4421373858900473277L;
     @Column(name = "usuario_id", nullable = false)
