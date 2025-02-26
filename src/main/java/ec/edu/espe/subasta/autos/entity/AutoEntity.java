@@ -44,4 +44,67 @@ public class AutoEntity {
     @Column(name = "fecha_creacion")
     private LocalDate fechaCreacion;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public String getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+
+    public Integer getAnio() {
+        return anio;
+    }
+
+    public void setAnio(Integer anio) {
+        this.anio = anio;
+    }
+
+    public Float getPrecioBase() {
+        return precioBase;
+    }
+
+    public void setPrecioBase(Float precioBase) {
+        this.precioBase = precioBase;
+    }
+
+    public UsuarioEntity getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(UsuarioEntity vendedor) {
+        this.vendedor = vendedor;
+    }
+
+    public Boolean getVendido() {
+        return vendido;
+    }
+
+    public void setVendido(Boolean vendido) {
+        this.vendido = vendido;
+    }
+
+    public LocalDate getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDate fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
 }

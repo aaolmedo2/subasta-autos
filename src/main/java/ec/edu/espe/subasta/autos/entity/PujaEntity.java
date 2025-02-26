@@ -35,4 +35,43 @@ public class PujaEntity {
     @Column(name = "fecha_puja")
     private LocalDate fechaPuja;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public SubastaEntity getSubasta() {
+        return subasta;
+    }
+
+    public void setSubasta(SubastaEntity subasta) {
+        this.subasta = subasta;
+    }
+
+    public UsuarioEntity getComprador() {
+        return comprador;
+    }
+
+    public void setComprador(UsuarioEntity comprador) {
+        this.comprador = comprador;
+    }
+
+    public Float getMonto() {
+        return monto;
+    }
+
+    public void setMonto(Float monto) {
+        this.monto = monto;
+    }
+
+    public LocalDate getFechaPuja() {
+        return fechaPuja;
+    }
+
+    public void setFechaPuja(LocalDate fechaPuja) {
+        this.fechaPuja = fechaPuja;
+    }
 }

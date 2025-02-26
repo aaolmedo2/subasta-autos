@@ -37,4 +37,11 @@ public class UsuariosRoleEntityId implements java.io.Serializable {
         return Objects.hash(rolId, usuarioId);
     }
 
+    public UsuariosRoleEntityId() {
+    }
+
+    public UsuariosRoleEntityId(Integer usuarioId, Integer rolId) {
+        this.usuarioId = usuarioId;
+        this.rolId = rolId;
+    }
 }
