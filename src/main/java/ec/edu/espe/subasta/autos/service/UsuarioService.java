@@ -15,8 +15,10 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
@@ -36,15 +38,18 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
     private final UsuarioRolRepository usuarioRolRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
     private String msgError;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, RolRepository rolRepository, UsuarioRolRepository usuarioRolRepository) {
+    @Autowired
+    public UsuarioService(UsuarioRepository usuarioRepository, RolRepository rolRepository, UsuarioRolRepository usuarioRolRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.usuarioRolRepository = usuarioRolRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     //crear usuario
@@ -142,7 +147,7 @@ public class UsuarioService {
         UsuarioEntity usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new AccountNotFound("Account does not exist"));
 
-        if (!usuario.getContraseniaHash().equals(password)) {
+        if (!passwordEncoder.matches(password, usuario.getContraseniaHash())) {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
