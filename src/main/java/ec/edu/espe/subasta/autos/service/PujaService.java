@@ -99,6 +99,5 @@ public class PujaService {
         // Validar que el comprador tiene el rol adecuado (esto requeriría acceso al servicio de roles)
         // Implementar según tu lógica de roles
 
-        // Las demás validaciones ya están en el método realizarPuja
     }
 } 

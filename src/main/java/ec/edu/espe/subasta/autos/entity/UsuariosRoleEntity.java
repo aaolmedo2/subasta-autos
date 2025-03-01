@@ -11,7 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "usuarios_roles")
 public class UsuariosRoleEntity {

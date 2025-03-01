@@ -13,8 +13,6 @@ import java.util.Objects;
 @Getter
 @Setter
 @Embeddable
-@AllArgsConstructor
-@NoArgsConstructor
 public class UsuariosRoleEntityId implements java.io.Serializable {
     private static final long serialVersionUID = 4421373858900473277L;
     @Column(name = "usuario_id", nullable = false)
