@@ -11,7 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
+
 @Entity
 @Table(name = "usuarios_roles")
 public class UsuariosRoleEntity {
@@ -31,4 +31,36 @@ public class UsuariosRoleEntity {
     @JoinColumn(name = "rol_id", nullable = false)
     private RoleEntity rol;
 
+    public UsuariosRoleEntityId getId() {
+        return id;
+    }
+
+    public void setId(UsuariosRoleEntityId id) {
+        this.id = id;
+    }
+
+    public UsuarioEntity getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(UsuarioEntity usuario) {
+        this.usuario = usuario;
+    }
+
+    public RoleEntity getRol() {
+        return rol;
+    }
+
+    public void setRol(RoleEntity rol) {
+        this.rol = rol;
+    }
+
+    public UsuariosRoleEntity() {
+    }
+
+    public UsuariosRoleEntity(UsuariosRoleEntityId id, RoleEntity rol, UsuarioEntity usuario) {
+        this.id = id;
+        this.rol = rol;
+        this.usuario = usuario;
+    }
 }
