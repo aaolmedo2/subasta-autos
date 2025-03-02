@@ -25,7 +25,7 @@ import java.util.List;
         maxAge = 3600L
 )
 @RestController
-@RequestMapping({"/api/authorization-server"})
+@RequestMapping({"/api/auth"})
 public class AuthController {
 
     private final UsuarioService usuarioService;
