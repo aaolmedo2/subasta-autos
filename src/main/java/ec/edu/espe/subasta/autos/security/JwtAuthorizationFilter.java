@@ -14,7 +14,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
@@ -56,11 +59,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private void setUpSecurity(Claims claims) {
-        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(claims.get("authority").toString());
+        String authorities = claims.get("authority").toString();
+        List<SimpleGrantedAuthority> grantedAuthorities = Arrays.stream(authorities.split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(),
                 null,
-                Collections.singletonList(simpleGrantedAuthority));
+                grantedAuthorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 

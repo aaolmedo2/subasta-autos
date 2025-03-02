@@ -29,8 +29,8 @@ public class AutoController {
         this.autoService = autoService;
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR')")
-    //@PreAuthorize("hasAnyAuthority('ROLE_VENDEDOR', 'ROLE_ADMINISTRADOR')")
+    //PERMITIR A VENDEDORES, COMPRADORES Y ADMINISTRADORES CREAR VEHICULOS
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR', 'ROLE_VENDEDOR', 'ROLE_COMPRADOR')")
     @PostMapping("/create")
     public ResponseEntity<?> createVehiculo(@RequestBody AutoDTO autoDTO) {
         try {
@@ -41,6 +41,7 @@ public class AutoController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR', 'ROLE_VENDEDOR', 'ROLE_COMPRADOR')")
     //update vehicle seller
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateVehicle(@PathVariable Integer id, @RequestBody AutoDTO autoDTO) {
@@ -56,11 +57,13 @@ public class AutoController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR')")
     // Admin endpoints
     @GetMapping("/allVehicles")
     public ResponseEntity<List<AutoDTO>> getAllVehicles() {
         return ResponseEntity.ok(autoService.getAllVehicles());
     }
+
 
     // Delete vehicle
     @DeleteMapping("/delete/{id}")
