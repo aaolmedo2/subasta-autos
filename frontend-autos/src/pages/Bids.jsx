@@ -23,34 +23,29 @@ import {
 } from '@mui/material';
 import { auctionService, bidService, vehicleService, getUserRoleFromToken, getUserIdFromToken } from '../services/api';
 
-const Auctions = () => {
+const Bids = () => {
     const [auctions, setAuctions] = useState([]);
-    const [vehicles, setVehicles] = useState([]);
-    const [open, setOpen] = useState(false);
-    const [bidDialogOpen, setBidDialogOpen] = useState(false);
     const [selectedAuction, setSelectedAuction] = useState(null);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [bids, setBids] = useState([]);
-    const [formData, setFormData] = useState({
-        autoId: '',
-        fechaInicio: '',
-        fechaFin: '',
-        precioMinimo: '',
-    });
     const [bidAmount, setBidAmount] = useState('');
+    const [open, setOpen] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
-    const [userRole, setUserRole] = useState(null);
     const [userId, setUserId] = useState(null);
+    const [userRole, setUserRole] = useState(null);
+    const [vehicles, setVehicles] = useState([]);
 
     useEffect(() => {
-        const role = getUserRoleFromToken();
         const id = getUserIdFromToken();
-        setUserRole(role);
+        const role = getUserRoleFromToken();
         setUserId(id);
+        setUserRole(role);
         loadAuctions();
-        loadVehicles();
+        if (role === 'ROLE_VENDEDOR') {
+            loadVehicles(id);
+        }
     }, []);
 
     const loadAuctions = async () => {
@@ -69,58 +64,16 @@ const Auctions = () => {
         }
     };
 
-    const loadVehicles = async () => {
+    const loadVehicles = async (vendedorId) => {
         try {
-            let data;
-            if (userRole === 'ROLE_VENDEDOR') {
-                data = await vehicleService.getVehiclesByVendedor(userId);
-            } else {
-                data = await vehicleService.getAvailableVehicles();
-            }
+            const data = await vehicleService.getVehiclesByVendedor(vendedorId);
             setVehicles(data || []);
         } catch (error) {
             console.error('Error loading vehicles:', error);
         }
     };
 
-    const handleOpen = () => {
-        setFormData({
-            autoId: '',
-            fechaInicio: '',
-            fechaFin: '',
-            precioMinimo: '',
-        });
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setSuccess('');
-
-        try {
-            await auctionService.createAuction(formData);
-            setSuccess('Subasta creada exitosamente');
-            handleClose();
-            loadAuctions();
-        } catch (error) {
-            console.error('Error creating auction:', error);
-            setError('Error al crear la subasta');
-        }
-    };
-
-    const handleBidDialogOpen = async (auction) => {
+    const handleOpenBidDialog = async (auction) => {
         setSelectedAuction(auction);
         try {
             // Cargar información del vehículo
@@ -131,15 +84,15 @@ const Auctions = () => {
             const bidsData = await bidService.getBidsForAuction(auction.id);
             setBids(bidsData || []);
 
-            setBidDialogOpen(true);
+            setOpen(true);
         } catch (error) {
-            console.error('Error loading auction details:', error);
-            setError('Error al cargar los detalles de la subasta');
+            console.error('Error loading bids:', error);
+            setError('Error al cargar las pujas de la subasta');
         }
     };
 
-    const handleBidDialogClose = () => {
-        setBidDialogOpen(false);
+    const handleCloseBidDialog = () => {
+        setOpen(false);
         setSelectedAuction(null);
         setSelectedVehicle(null);
         setBidAmount('');
@@ -182,7 +135,7 @@ const Auctions = () => {
     return (
         <Container>
             <Typography variant="h4" component="h1" gutterBottom>
-                Subastas Activas
+                Pujas en Subastas Activas
             </Typography>
 
             {error && (
@@ -195,18 +148,6 @@ const Auctions = () => {
                 <Alert severity="success" sx={{ mb: 2 }}>
                     {success}
                 </Alert>
-            )}
-
-            {(userRole === 'ROLE_ADMINISTRADOR' || userRole === 'ROLE_VENDEDOR') && (
-                <Box sx={{ mb: 3 }}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleOpen}
-                    >
-                        Crear Nueva Subasta
-                    </Button>
-                </Box>
             )}
 
             {loading ? (
@@ -247,7 +188,7 @@ const Auctions = () => {
                                             fullWidth
                                             variant="contained"
                                             color="primary"
-                                            onClick={() => handleBidDialogOpen(auction)}
+                                            onClick={() => handleOpenBidDialog(auction)}
                                             disabled={isVehicleSeller(auction.autoId)}
                                         >
                                             {isVehicleSeller(auction.autoId)
@@ -262,73 +203,7 @@ const Auctions = () => {
                 </Grid>
             )}
 
-            {/* Diálogo para crear subasta */}
-            <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Crear Nueva Subasta</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        select
-                        margin="dense"
-                        name="autoId"
-                        label="Vehículo"
-                        fullWidth
-                        value={formData.autoId}
-                        onChange={handleChange}
-                        SelectProps={{
-                            native: true,
-                        }}
-                    >
-                        <option value="">Seleccione un vehículo</option>
-                        {vehicles.map((vehicle) => (
-                            <option key={vehicle.id} value={vehicle.id}>
-                                {vehicle.marca} {vehicle.modelo} ({vehicle.anio})
-                            </option>
-                        ))}
-                    </TextField>
-                    <TextField
-                        margin="dense"
-                        name="fechaInicio"
-                        label="Fecha de Inicio"
-                        type="date"
-                        fullWidth
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        value={formData.fechaInicio}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        name="fechaFin"
-                        label="Fecha de Fin"
-                        type="date"
-                        fullWidth
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        value={formData.fechaFin}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        name="precioMinimo"
-                        label="Precio Mínimo"
-                        type="number"
-                        fullWidth
-                        value={formData.precioMinimo}
-                        onChange={handleChange}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancelar</Button>
-                    <Button onClick={handleSubmit} variant="contained">
-                        Crear
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Diálogo para ver detalles y pujar */}
-            <Dialog open={bidDialogOpen} onClose={handleBidDialogClose} maxWidth="md" fullWidth>
+            <Dialog open={open} onClose={handleCloseBidDialog} maxWidth="md" fullWidth>
                 <DialogTitle>
                     Detalles de la Subasta #{selectedAuction?.id}
                 </DialogTitle>
@@ -411,7 +286,7 @@ const Auctions = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleBidDialogClose}>Cerrar</Button>
+                    <Button onClick={handleCloseBidDialog}>Cerrar</Button>
                     {!isVehicleSeller(selectedAuction?.autoId) && (
                         <Button onClick={handlePlaceBid} variant="contained" color="primary">
                             Realizar Puja
@@ -423,4 +298,4 @@ const Auctions = () => {
     );
 };
 
-export default Auctions; 
+export default Bids; 

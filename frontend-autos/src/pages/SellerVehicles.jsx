@@ -13,9 +13,6 @@ import {
     DialogActions,
     TextField,
     Alert,
-    Box,
-    ToggleButtonGroup,
-    ToggleButton,
     Paper,
     Table,
     TableBody,
@@ -25,13 +22,14 @@ import {
     TableRow,
     IconButton,
     CircularProgress,
+    Box,
     Tabs,
     Tab,
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
-import { vehicleService, getUserRoleFromToken, getUserIdFromToken } from '../services/api';
+import { vehicleService, getUserIdFromToken } from '../services/api';
 
-const Vehicles = () => {
+const SellerVehicles = () => {
     const [vehicles, setVehicles] = useState([]);
     const [open, setOpen] = useState(false);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -43,53 +41,32 @@ const Vehicles = () => {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [userRole, setUserRole] = useState(null);
-    const [userId, setUserId] = useState(null);
-    const [viewMode, setViewMode] = useState('available');
-    const [displayMode, setDisplayMode] = useState('cards');
+    const [vendedorId, setVendedorId] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [viewMode, setViewMode] = useState('cards');
 
     useEffect(() => {
-        const role = getUserRoleFromToken();
-        const id = getUserIdFromToken();
-        setUserRole(role);
-        setUserId(id);
-        loadVehicles();
-    }, [viewMode]);
+        const userId = getUserIdFromToken();
+        console.log("ID del vendedor:", userId);
+        setVendedorId(userId);
+        if (userId) {
+            loadSellerVehicles(userId);
+        }
+    }, []);
 
-    const loadVehicles = async () => {
+    const loadSellerVehicles = async (id) => {
         try {
             setLoading(true);
             setError('');
-            let data;
-
-            if (viewMode === 'all' && userRole === 'ROLE_ADMINISTRADOR') {
-                console.log("Cargando todos los vehículos (admin)");
-                data = await vehicleService.getAllVehicles();
-            } else {
-                console.log("Cargando vehículos disponibles");
-                data = await vehicleService.getAvailableVehicles();
-            }
-
+            console.log("Cargando vehículos para vendedor ID:", id);
+            const data = await vehicleService.getVehiclesByVendedor(id);
             console.log("Vehículos obtenidos:", data);
             setVehicles(data || []);
         } catch (error) {
-            console.error('Error loading vehicles:', error);
-            setError('Error al cargar los vehículos');
+            console.error('Error loading seller vehicles:', error);
+            setError('Error al cargar los vehículos del vendedor');
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleViewModeChange = (event, newMode) => {
-        if (newMode !== null) {
-            setViewMode(newMode);
-        }
-    };
-
-    const handleDisplayModeChange = (event, newMode) => {
-        if (newMode !== null) {
-            setDisplayMode(newMode);
         }
     };
 
@@ -137,20 +114,19 @@ const Vehicles = () => {
                 await vehicleService.updateVehicle(selectedVehicle.id, formData);
                 setSuccess('Vehículo actualizado exitosamente');
             } else {
-                // Si es vendedor, incluir su ID
+                // Asegurarse de incluir el ID del vendedor
                 const vehicleData = {
                     ...formData,
+                    vendedorId: parseInt(vendedorId),
                 };
-
-                if (userRole === 'ROLE_VENDEDOR') {
-                    vehicleData.vendedorId = parseInt(userId);
-                }
-
+                console.log("Datos del vehículo a crear:", vehicleData);
                 await vehicleService.createVehicle(vehicleData);
                 setSuccess('Vehículo creado exitosamente');
             }
             handleClose();
-            loadVehicles();
+            if (vendedorId) {
+                loadSellerVehicles(vendedorId);
+            }
         } catch (error) {
             console.error('Error saving vehicle:', error);
             setError('Error al guardar el vehículo');
@@ -161,24 +137,23 @@ const Vehicles = () => {
         try {
             await vehicleService.deleteVehicle(id);
             setSuccess('Vehículo eliminado exitosamente');
-            loadVehicles();
+            if (vendedorId) {
+                loadSellerVehicles(vendedorId);
+            }
         } catch (error) {
             console.error('Error deleting vehicle:', error);
             setError('Error al eliminar el vehículo');
         }
     };
 
-    // Verificar si el usuario puede editar/eliminar un vehículo
-    const canEditVehicle = (vehicle) => {
-        if (userRole === 'ROLE_ADMINISTRADOR') return true;
-        if (userRole === 'ROLE_VENDEDOR' && vehicle.vendedorId === parseInt(userId)) return true;
-        return false;
+    const handleViewModeChange = (event, newValue) => {
+        setViewMode(newValue);
     };
 
     return (
         <Container>
             <Typography variant="h4" component="h1" gutterBottom>
-                Vehículos
+                Mis Vehículos
             </Typography>
 
             {error && (
@@ -194,42 +169,19 @@ const Vehicles = () => {
             )}
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Box>
-                    {userRole === 'ROLE_ADMINISTRADOR' && (
-                        <ToggleButtonGroup
-                            value={viewMode}
-                            exclusive
-                            onChange={handleViewModeChange}
-                            aria-label="modo de visualización"
-                            sx={{ mr: 2 }}
-                        >
-                            <ToggleButton value="available" aria-label="disponibles">
-                                Vehículos Disponibles
-                            </ToggleButton>
-                            <ToggleButton value="all" aria-label="todos">
-                                Todos los Vehículos
-                            </ToggleButton>
-                        </ToggleButtonGroup>
-                    )}
-                </Box>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<Add />}
+                    onClick={() => handleOpen()}
+                >
+                    Agregar Vehículo
+                </Button>
 
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Tabs value={displayMode} onChange={handleDisplayModeChange} aria-label="display mode" sx={{ mr: 2 }}>
-                        <Tab label="Tarjetas" value="cards" />
-                        <Tab label="Tabla" value="table" />
-                    </Tabs>
-
-                    {(userRole === 'ROLE_ADMINISTRADOR' || userRole === 'ROLE_VENDEDOR') && (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<Add />}
-                            onClick={() => handleOpen()}
-                        >
-                            Agregar Vehículo
-                        </Button>
-                    )}
-                </Box>
+                <Tabs value={viewMode} onChange={handleViewModeChange} aria-label="view mode">
+                    <Tab label="Tarjetas" value="cards" />
+                    <Tab label="Tabla" value="table" />
+                </Tabs>
             </Box>
 
             {loading ? (
@@ -238,9 +190,9 @@ const Vehicles = () => {
                 </Box>
             ) : vehicles.length === 0 ? (
                 <Alert severity="info">
-                    No hay vehículos disponibles en este momento.
+                    No tienes vehículos registrados. ¡Agrega uno nuevo!
                 </Alert>
-            ) : displayMode === 'cards' ? (
+            ) : viewMode === 'cards' ? (
                 <Grid container spacing={3}>
                     {vehicles.map((vehicle) => (
                         <Grid item xs={12} sm={6} md={4} key={vehicle.id}>
@@ -252,35 +204,28 @@ const Vehicles = () => {
                                     <Typography color="text.secondary" gutterBottom>
                                         Año: {vehicle.anio}
                                     </Typography>
-                                    <Typography variant="body2" gutterBottom>
+                                    <Typography variant="body2">
                                         Precio Base: ${vehicle.precio_base}
                                     </Typography>
-                                    {viewMode === 'all' && (
-                                        <Typography variant="body2">
-                                            ID Vendedor: {vehicle.vendedorId || 'No asignado'}
-                                        </Typography>
-                                    )}
                                 </CardContent>
-                                {canEditVehicle(vehicle) && (
-                                    <CardActions>
-                                        <Button
-                                            size="small"
-                                            color="primary"
-                                            onClick={() => handleOpen(vehicle)}
-                                            startIcon={<Edit />}
-                                        >
-                                            Editar
-                                        </Button>
-                                        <Button
-                                            size="small"
-                                            color="error"
-                                            onClick={() => handleDelete(vehicle.id)}
-                                            startIcon={<Delete />}
-                                        >
-                                            Eliminar
-                                        </Button>
-                                    </CardActions>
-                                )}
+                                <CardActions>
+                                    <Button
+                                        size="small"
+                                        color="primary"
+                                        onClick={() => handleOpen(vehicle)}
+                                        startIcon={<Edit />}
+                                    >
+                                        Editar
+                                    </Button>
+                                    <Button
+                                        size="small"
+                                        color="error"
+                                        onClick={() => handleDelete(vehicle.id)}
+                                        startIcon={<Delete />}
+                                    >
+                                        Eliminar
+                                    </Button>
+                                </CardActions>
                             </Card>
                         </Grid>
                     ))}
@@ -295,7 +240,6 @@ const Vehicles = () => {
                                 <TableCell>Modelo</TableCell>
                                 <TableCell>Año</TableCell>
                                 <TableCell>Precio Base</TableCell>
-                                {viewMode === 'all' && <TableCell>ID Vendedor</TableCell>}
                                 <TableCell>Acciones</TableCell>
                             </TableRow>
                         </TableHead>
@@ -307,28 +251,19 @@ const Vehicles = () => {
                                     <TableCell>{vehicle.modelo}</TableCell>
                                     <TableCell>{vehicle.anio}</TableCell>
                                     <TableCell>${vehicle.precio_base}</TableCell>
-                                    {viewMode === 'all' && <TableCell>{vehicle.vendedorId || 'No asignado'}</TableCell>}
                                     <TableCell>
-                                        {canEditVehicle(vehicle) ? (
-                                            <>
-                                                <IconButton
-                                                    color="primary"
-                                                    onClick={() => handleOpen(vehicle)}
-                                                >
-                                                    <Edit />
-                                                </IconButton>
-                                                <IconButton
-                                                    color="error"
-                                                    onClick={() => handleDelete(vehicle.id)}
-                                                >
-                                                    <Delete />
-                                                </IconButton>
-                                            </>
-                                        ) : (
-                                            <Typography variant="body2" color="text.secondary">
-                                                No disponible
-                                            </Typography>
-                                        )}
+                                        <IconButton
+                                            color="primary"
+                                            onClick={() => handleOpen(vehicle)}
+                                        >
+                                            <Edit />
+                                        </IconButton>
+                                        <IconButton
+                                            color="error"
+                                            onClick={() => handleDelete(vehicle.id)}
+                                        >
+                                            <Delete />
+                                        </IconButton>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -388,4 +323,4 @@ const Vehicles = () => {
     );
 };
 
-export default Vehicles; 
+export default SellerVehicles; 

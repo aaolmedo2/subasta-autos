@@ -30,7 +30,7 @@ public class AutoController {
     }
 
     //PERMITIR A VENDEDORES, COMPRADORES Y ADMINISTRADORES CREAR VEHICULOS
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR', 'ROLE_VENDEDOR', 'ROLE_COMPRADOR')")
+    //@PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR', 'ROLE_VENDEDOR', 'ROLE_COMPRADOR')")
     @PostMapping("/create")
     public ResponseEntity<?> createVehiculo(@RequestBody AutoDTO autoDTO) {
         try {
@@ -41,7 +41,7 @@ public class AutoController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR', 'ROLE_VENDEDOR', 'ROLE_COMPRADOR')")
+    //@PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR', 'ROLE_VENDEDOR', 'ROLE_COMPRADOR')")
     //update vehicle seller
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateVehicle(@PathVariable Integer id, @RequestBody AutoDTO autoDTO) {

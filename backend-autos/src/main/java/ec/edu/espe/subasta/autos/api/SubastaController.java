@@ -3,6 +3,7 @@ package ec.edu.espe.subasta.autos.api;
 import ec.edu.espe.subasta.autos.api.DTO.SubastaDTO;
 import ec.edu.espe.subasta.autos.service.SubastaService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,8 @@ public class SubastaController {
         }
     }
 
+    //@PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR', 'ROLE_VENDEDOR', 'ROLE_COMPRADOR')")
+    @PreAuthorize("hasAuthority('ROLE_COMPRADOR')")
     @GetMapping("/activas")
     public ResponseEntity<?> obtenerSubastasActivas() {
         return ResponseEntity.ok(subastaService.obtenerSubastasActivas());

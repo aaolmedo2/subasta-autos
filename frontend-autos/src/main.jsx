@@ -5,6 +5,14 @@ import store from './store';
 import App from './App';
 import './index.css';
 
+// Asegurarse de que el elemento root existe
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  const rootDiv = document.createElement('div');
+  rootDiv.id = 'root';
+  document.body.appendChild(rootDiv);
+}
+
 const root = createRoot(document.getElementById('root'));
 
 root.render(

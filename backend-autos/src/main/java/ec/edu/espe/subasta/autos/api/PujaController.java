@@ -3,6 +3,7 @@ package ec.edu.espe.subasta.autos.api;
 import ec.edu.espe.subasta.autos.api.DTO.PujaDTO;
 import ec.edu.espe.subasta.autos.service.PujaService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,6 +16,7 @@ public class PujaController {
         this.pujaService = pujaService;
     }
 
+    @PreAuthorize("hasAnyAuthority('ROLE_COMPRADOR')")
     @PostMapping("/realizar")
     public ResponseEntity<?> realizarPuja(@RequestBody PujaDTO pujaDTO) {
         try {

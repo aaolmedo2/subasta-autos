@@ -15,9 +15,20 @@ const authSlice = createSlice({
         loginSuccess: (state, action) => {
             state.token = action.payload;
             state.isAuthenticated = true;
-            state.user = jwtDecode(action.payload);
+            const decodedToken = jwtDecode(action.payload);
+            state.user = decodedToken;
             state.error = null;
             localStorage.setItem('token', action.payload);
+
+            // Guardar el ID del usuario en localStorage para acceso fácil
+            if (decodedToken && decodedToken.id) {
+                localStorage.setItem('userId', decodedToken.id);
+            }
+
+            // Guardar el rol del usuario en localStorage para acceso fácil
+            if (decodedToken && decodedToken.rol) {
+                localStorage.setItem('userRole', decodedToken.rol);
+            }
         },
         loginFailure: (state, action) => {
             state.token = null;
@@ -25,6 +36,8 @@ const authSlice = createSlice({
             state.user = null;
             state.error = action.payload;
             localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userRole');
         },
         logout: (state) => {
             state.token = null;
@@ -32,6 +45,8 @@ const authSlice = createSlice({
             state.user = null;
             state.error = null;
             localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userRole');
         },
     },
 });

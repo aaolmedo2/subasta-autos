@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,21 +14,61 @@ import {
     Toolbar,
     Typography,
     Button,
+    Divider,
+    Chip,
 } from '@mui/material';
 import {
     Menu as MenuIcon,
     DirectionsCar,
     Gavel,
     ExitToApp,
+    Person,
+    MonetizationOn,
+    AdminPanelSettings,
 } from '@mui/icons-material';
 import { logout } from '../store/slices/authSlice';
+import { getUserRoleFromToken } from '../services/api';
 
 const drawerWidth = 240;
 
+// Función para obtener el nombre amigable del rol
+const getRoleName = (role) => {
+    switch (role) {
+        case 'ROLE_ADMINISTRADOR':
+            return 'Administrador';
+        case 'ROLE_VENDEDOR':
+            return 'Vendedor';
+        case 'ROLE_COMPRADOR':
+            return 'Comprador';
+        default:
+            return role;
+    }
+};
+
+// Función para obtener el color del chip según el rol
+const getRoleColor = (role) => {
+    switch (role) {
+        case 'ROLE_ADMINISTRADOR':
+            return 'error';
+        case 'ROLE_VENDEDOR':
+            return 'success';
+        case 'ROLE_COMPRADOR':
+            return 'primary';
+        default:
+            return 'default';
+    }
+};
+
 const Layout = ({ children }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [userRole, setUserRole] = useState(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const role = getUserRoleFromToken();
+        setUserRole(role);
+    }, []);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -39,16 +79,28 @@ const Layout = ({ children }) => {
         navigate('/login');
     };
 
-    const menuItems = [
-        { text: 'Vehículos', icon: <DirectionsCar />, path: '/dashboard/vehicles' },
-        { text: 'Subastas', icon: <Gavel />, path: '/dashboard/auctions' },
+    // Menú común para todos los usuarios
+    const commonMenuItems = [
+        { text: 'Vehículos Disponibles', icon: <DirectionsCar />, path: '/dashboard/vehicles' },
+        { text: 'Subastas Activas', icon: <Gavel />, path: '/dashboard/auctions' },
+        { text: 'Pujas', icon: <MonetizationOn />, path: '/dashboard/bids' },
     ];
+
+    // Menú específico para vendedores
+    const sellerMenuItems = userRole === 'ROLE_VENDEDOR' ? [
+        { text: 'Mis Vehículos', icon: <DirectionsCar />, path: '/dashboard/seller-vehicles' },
+    ] : [];
+
+    // Menú específico para administradores
+    const adminMenuItems = userRole === 'ROLE_ADMINISTRADOR' ? [
+        { text: 'Gestión de Usuarios', icon: <AdminPanelSettings />, path: '/dashboard/admin/users' },
+    ] : [];
 
     const drawer = (
         <div>
             <Toolbar />
             <List>
-                {menuItems.map((item) => (
+                {commonMenuItems.map((item) => (
                     <ListItem
                         button
                         key={item.text}
@@ -59,6 +111,42 @@ const Layout = ({ children }) => {
                     </ListItem>
                 ))}
             </List>
+
+            {sellerMenuItems.length > 0 && (
+                <>
+                    <Divider />
+                    <List>
+                        {sellerMenuItems.map((item) => (
+                            <ListItem
+                                button
+                                key={item.text}
+                                onClick={() => navigate(item.path)}
+                            >
+                                <ListItemIcon>{item.icon}</ListItemIcon>
+                                <ListItemText primary={item.text} />
+                            </ListItem>
+                        ))}
+                    </List>
+                </>
+            )}
+
+            {adminMenuItems.length > 0 && (
+                <>
+                    <Divider />
+                    <List>
+                        {adminMenuItems.map((item) => (
+                            <ListItem
+                                button
+                                key={item.text}
+                                onClick={() => navigate(item.path)}
+                            >
+                                <ListItemIcon>{item.icon}</ListItemIcon>
+                                <ListItemText primary={item.text} />
+                            </ListItem>
+                        ))}
+                    </List>
+                </>
+            )}
         </div>
     );
 
@@ -85,6 +173,16 @@ const Layout = ({ children }) => {
                     <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
                         Subasta de Autos
                     </Typography>
+
+                    {userRole && (
+                        <Chip
+                            label={getRoleName(userRole)}
+                            color={getRoleColor(userRole)}
+                            icon={<Person />}
+                            sx={{ mr: 2 }}
+                        />
+                    )}
+
                     <Button color="inherit" onClick={handleLogout} startIcon={<ExitToApp />}>
                         Cerrar Sesión
                     </Button>
