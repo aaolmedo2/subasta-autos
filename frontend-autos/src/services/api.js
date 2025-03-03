@@ -19,6 +19,9 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// Caché para almacenar el ID del usuario por email
+const userIdCache = new Map();
+
 export const authService = {
     login: async (credentials) => {
         try {
@@ -31,6 +34,11 @@ export const authService = {
             if (token) {
                 console.log('Token received, storing in localStorage');
                 localStorage.setItem('token', token);
+
+                // Guardar el email del usuario para futuras referencias
+                if (credentials.email) {
+                    localStorage.setItem('userEmail', credentials.email);
+                }
             } else {
                 console.error('No token found in response:', response.data);
             }
@@ -49,6 +57,8 @@ export const authService = {
 
     logout: () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('userEmail');
+        userIdCache.clear();
     },
 
     getCurrentUserRoles: () => {
@@ -89,14 +99,48 @@ export const authService = {
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                // Asumiendo que el ID del usuario está en el campo 'sub' o algún otro campo
-                // Esto dependerá de cómo esté estructurado tu JWT
-                return payload.userId || payload.sub;
+                // Intentar obtener el ID del usuario del token
+                if (payload.userId) {
+                    return payload.userId;
+                }
+
+                // Si no está en el token, intentar obtenerlo del email
+                const userEmail = localStorage.getItem('userEmail');
+                if (userEmail && userIdCache.has(userEmail)) {
+                    return userIdCache.get(userEmail);
+                }
+
+                // Si no tenemos el ID, usamos el sub (email) como identificador temporal
+                return payload.sub;
             } catch (error) {
                 console.error('Error getting user ID from token:', error);
             }
         }
         return null;
+    },
+
+    getUserIdByEmail: async (email) => {
+        // Si ya tenemos el ID en caché, lo devolvemos
+        if (userIdCache.has(email)) {
+            return userIdCache.get(email);
+        }
+
+        try {
+            // Aquí deberías tener un endpoint que te permita obtener el ID del usuario por email
+            // Por ejemplo: /api/usuario/findByEmail?email=test@example.com
+            const response = await api.get(`/usuario/findByEmail?email=${encodeURIComponent(email)}`);
+            const userId = response.data.id;
+
+            // Guardar en caché para futuras referencias
+            if (userId) {
+                userIdCache.set(email, userId);
+            }
+
+            return userId;
+        } catch (error) {
+            console.error('Error getting user ID by email:', error);
+            return null;
+        }
     },
 
     hasRole: (roleToCheck) => {
@@ -117,7 +161,7 @@ export const authService = {
 export const vehicleService = {
     getAllVehicles: async () => {
         try {
-            const response = await api.get('/vehiculo/allVehicles');
+            const response = await api.get('/vehiculo/getAllVehicles');
             console.log('All vehicles:', response.data);
             return response.data;
         } catch (error) {
@@ -128,6 +172,7 @@ export const vehicleService = {
 
     getVehiclesByVendedor: async (vendedorId) => {
         try {
+            console.log('Getting vehicles for vendedor ID:', vendedorId);
             const response = await api.get(`/vehiculo/getAll/${vendedorId}`);
             console.log('Vehicles by vendedor:', response.data);
             return response.data;
@@ -140,7 +185,7 @@ export const vehicleService = {
     createVehicle: async (vehicleData) => {
         try {
             console.log('Creating vehicle with data:', vehicleData);
-            const response = await api.post('/vehiculo/create', vehicleData);
+            const response = await api.post('/vehiculo', vehicleData);
             return response.data;
         } catch (error) {
             console.error('Error creating vehicle:', error);
@@ -151,7 +196,7 @@ export const vehicleService = {
     updateVehicle: async (id, vehicleData) => {
         try {
             console.log('Updating vehicle with ID:', id, 'and data:', vehicleData);
-            const response = await api.put(`/vehiculo/update/${id}`, vehicleData);
+            const response = await api.put(`/vehiculo/update`, vehicleData);
             return response.data;
         } catch (error) {
             console.error('Error updating vehicle:', error);
@@ -162,7 +207,7 @@ export const vehicleService = {
     deleteVehicle: async (id) => {
         try {
             console.log('Deleting vehicle with ID:', id);
-            const response = await api.delete(`/vehiculo/delete/${id}`);
+            const response = await api.delete(`/vehiculo/${id}`);
             return response.data;
         } catch (error) {
             console.error('Error deleting vehicle:', error);
@@ -185,17 +230,40 @@ export const subastaService = {
 
     realizarPuja: async (subastaId, monto) => {
         try {
-            // Obtener el ID del usuario actual
-            const compradorId = authService.getCurrentUserId();
+            // Obtener el email del usuario actual
+            const userEmail = localStorage.getItem('userEmail');
+            let compradorId = null;
+
+            // Intentar obtener el ID del usuario
+            if (userEmail) {
+                // Primero intentamos obtener el ID del caché
+                if (userIdCache.has(userEmail)) {
+                    compradorId = userIdCache.get(userEmail);
+                } else {
+                    // Si no está en caché, intentamos obtenerlo del backend
+                    compradorId = await authService.getUserIdByEmail(userEmail);
+                }
+            }
+
+            // Si no pudimos obtener el ID, usamos el ID del token
+            if (!compradorId) {
+                compradorId = authService.getCurrentUserId();
+            }
 
             if (!compradorId) {
                 throw new Error('No se pudo obtener el ID del usuario');
             }
 
+            // Asegurarse de que compradorId sea un número
+            if (isNaN(parseInt(compradorId))) {
+                console.error('compradorId no es un número:', compradorId);
+                throw new Error('El ID del comprador debe ser un número');
+            }
+
             const pujaData = {
-                subastaId: subastaId,
-                compradorId: compradorId,
-                monto: monto,
+                subastaId: parseInt(subastaId),
+                compradorId: parseInt(compradorId),
+                monto: parseFloat(monto),
                 fechaPuja: new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD
             };
 

@@ -167,6 +167,7 @@ public class UsuarioService {
                 .setId(UUID.randomUUID().toString()))
                 .setSubject(usuario.getEmail()))
                 .claim("authority", authority)
+                .claim("userId", usuario.getId()) // Agrega el id en el jwt
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000L)))
                 .signWith(generateKeyFromSecret(), SignatureAlgorithm.HS256)

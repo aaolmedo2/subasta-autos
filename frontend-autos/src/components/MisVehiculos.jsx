@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { vehicleService } from '../services/api';
+import { vehicleService, authService } from '../services/api';
 
 const MisVehiculos = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -11,30 +11,45 @@ const MisVehiculos = () => {
         marca: '',
         modelo: '',
         anio: '',
-        precio: '',
-        descripcion: ''
+        precio_base: '',
+        estado: false,
+        id_vendedor: ''
     });
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
-        loadVehicles();
+        // Obtener el ID del usuario actual desde el token JWT
+        const userId = authService.getCurrentUserId();
+        console.log('Current user ID:', userId);
+        setCurrentUserId(userId);
+
+        if (userId) {
+            loadVehicles(userId);
+        } else {
+            setError('No se pudo obtener el ID del usuario');
+            setLoading(false);
+        }
     }, []);
 
-    const loadVehicles = async () => {
+    const loadVehicles = async (vendedorId) => {
         try {
-            const data = await vehicleService.getVehiclesByVendedor();
+            console.log('Loading vehicles for vendedor ID:', vendedorId);
+            const data = await vehicleService.getVehiclesByVendedor(vendedorId);
+            console.log('Vehículos cargados:', data);
             setVehicles(data);
             setLoading(false);
         } catch (err) {
+            console.error('Error al cargar los vehículos:', err);
             setError('Error al cargar los vehículos');
             setLoading(false);
         }
     };
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
     };
 
@@ -43,8 +58,9 @@ const MisVehiculos = () => {
             marca: '',
             modelo: '',
             anio: '',
-            precio: '',
-            descripcion: ''
+            precio_base: '',
+            estado: false,
+            id_vendedor: currentUserId || ''
         });
         setSelectedVehicle(null);
         setIsEditing(false);
@@ -53,14 +69,33 @@ const MisVehiculos = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Asegurarse de que el ID del vendedor esté establecido
+            const vehicleData = {
+                ...formData,
+                id_vendedor: currentUserId
+            };
+
             if (isEditing) {
-                await vehicleService.updateVehicle(selectedVehicle.id, formData);
+                // Para actualizar, necesitamos adaptar los datos al formato esperado
+                const updateData = {
+                    nombre: formData.marca, // Usando marca como nombre
+                    email: formData.modelo, // Usando modelo como email
+                    password: "", // Campo vacío
+                    activo: formData.estado,
+                    fecha_registro: new Date().toISOString().split('T')[0] // Fecha actual
+                };
+
+                await vehicleService.updateVehicle(selectedVehicle.id_vendedor, updateData);
             } else {
-                await vehicleService.createVehicle(formData);
+                await vehicleService.createVehicle(vehicleData);
             }
-            await loadVehicles();
+
+            if (currentUserId) {
+                await loadVehicles(currentUserId);
+            }
             resetForm();
         } catch (err) {
+            console.error('Error al guardar el vehículo:', err);
             setError(isEditing ? 'Error al actualizar el vehículo' : 'Error al crear el vehículo');
         }
     };
@@ -71,8 +106,9 @@ const MisVehiculos = () => {
             marca: vehicle.marca,
             modelo: vehicle.modelo,
             anio: vehicle.anio,
-            precio: vehicle.precio,
-            descripcion: vehicle.descripcion
+            precio_base: vehicle.precio_base,
+            estado: vehicle.estado,
+            id_vendedor: vehicle.id_vendedor
         });
         setIsEditing(true);
     };
@@ -81,8 +117,11 @@ const MisVehiculos = () => {
         if (window.confirm('¿Estás seguro de que deseas eliminar este vehículo?')) {
             try {
                 await vehicleService.deleteVehicle(id);
-                await loadVehicles();
+                if (currentUserId) {
+                    await loadVehicles(currentUserId);
+                }
             } catch (err) {
+                console.error('Error al eliminar el vehículo:', err);
                 setError('Error al eliminar el vehículo');
             }
         }
@@ -154,12 +193,12 @@ const MisVehiculos = () => {
                         </div>
                         <div>
                             <label className="block text-gray-700 text-sm font-bold mb-2">
-                                Precio
+                                Precio Base
                             </label>
                             <input
                                 type="number"
-                                name="precio"
-                                value={formData.precio}
+                                name="precio_base"
+                                value={formData.precio_base}
                                 onChange={handleInputChange}
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 step="0.01"
@@ -167,18 +206,18 @@ const MisVehiculos = () => {
                             />
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Descripción
-                        </label>
-                        <textarea
-                            name="descripcion"
-                            value={formData.descripcion}
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            name="estado"
+                            id="estado"
+                            checked={formData.estado}
                             onChange={handleInputChange}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            rows="3"
-                            required
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                         />
+                        <label htmlFor="estado" className="ml-2 block text-sm text-gray-900">
+                            Disponible
+                        </label>
                     </div>
                     <div className="flex justify-end space-x-4">
                         <button
@@ -202,15 +241,16 @@ const MisVehiculos = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {vehicles.map((vehicle) => (
                     <div
-                        key={vehicle.id}
+                        key={vehicle.id_vendedor}
                         className="bg-white rounded-lg shadow-md overflow-hidden"
                     >
                         <div className="p-6">
                             <h3 className="text-xl font-semibold mb-2">{vehicle.marca} {vehicle.modelo}</h3>
                             <div className="text-gray-600 mb-4">
                                 <p>Año: {vehicle.anio}</p>
-                                <p>Precio: ${vehicle.precio}</p>
-                                <p className="mt-2">{vehicle.descripcion}</p>
+                                <p>Precio Base: ${vehicle.precio_base}</p>
+                                <p>Estado: {vehicle.estado ? 'Disponible' : 'No disponible'}</p>
+                                {vehicle.fecha && <p>Fecha: {new Date(vehicle.fecha).toLocaleDateString()}</p>}
                             </div>
                             <div className="flex justify-end space-x-2">
                                 <button
@@ -220,7 +260,7 @@ const MisVehiculos = () => {
                                     Editar
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(vehicle.id)}
+                                    onClick={() => handleDelete(vehicle.id_vendedor)}
                                     className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors"
                                 >
                                     Eliminar

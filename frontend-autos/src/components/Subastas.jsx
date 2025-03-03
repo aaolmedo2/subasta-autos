@@ -32,18 +32,32 @@ const Subastas = () => {
         if (!selectedSubasta || !pujaAmount) return;
 
         try {
+            // Convertir el monto a número y validar
+            const monto = parseFloat(pujaAmount);
+            if (isNaN(monto) || monto <= 0) {
+                setError('El monto de la puja debe ser un número positivo');
+                return;
+            }
+
+            // Asegurarse de que el monto sea mayor o igual al precio mínimo
+            if (monto < selectedSubasta.precioMinimo) {
+                setError(`El monto debe ser mayor o igual a $${selectedSubasta.precioMinimo}`);
+                return;
+            }
+
             await subastaService.realizarPuja(
                 selectedSubasta.autoId, // Usando autoId como subastaId
-                parseFloat(pujaAmount)
+                monto
             );
 
             // Reload subastas to get updated data
             await loadSubastas();
             setSelectedSubasta(null);
             setPujaAmount('');
+            setError(''); // Limpiar cualquier error previo
         } catch (err) {
             console.error('Error al realizar puja:', err);
-            setError('Error al realizar la puja');
+            setError(err.message || 'Error al realizar la puja');
         }
     };
 
@@ -125,6 +139,7 @@ const Subastas = () => {
                                     onClick={() => {
                                         setSelectedSubasta(null);
                                         setPujaAmount('');
+                                        setError(''); // Limpiar cualquier error al cerrar el modal
                                     }}
                                     className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 transition-colors"
                                 >

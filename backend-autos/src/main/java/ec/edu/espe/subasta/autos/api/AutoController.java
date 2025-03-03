@@ -59,7 +59,7 @@ public class AutoController {
 
     @PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR')")
     // Admin endpoints
-    @GetMapping("/allVehicles")
+    @GetMapping("/getAllVehicles")
     public ResponseEntity<List<AutoDTO>> getAllVehicles() {
         return ResponseEntity.ok(autoService.getAllVehicles());
     }
