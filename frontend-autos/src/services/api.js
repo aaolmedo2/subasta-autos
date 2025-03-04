@@ -237,6 +237,17 @@ export const subastaService = {
         }
     },
 
+    crearSubasta: async (subastaData) => {
+        try {
+            console.log('Creando subasta con datos:', subastaData);
+            const response = await api.post('/subasta/crear', subastaData);
+            return response.data;
+        } catch (error) {
+            console.error('Error al crear la subasta:', error);
+            throw error;
+        }
+    },
+
     getActiveSubastasByVendedor: async (vendedorId) => {
         try {
             console.log('Intentando obtener subastas para vendedor:', vendedorId);
