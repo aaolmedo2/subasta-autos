@@ -279,6 +279,16 @@ export const subastaService = {
     getAutoDetails: async (autoId) => {
         const response = await api.get(`/vehiculo/${autoId}`);
         return response.data;
+    },
+
+    finalizarSubasta: async (subastaId) => {
+        try {
+            const response = await api.put(`/subasta/${subastaId}/finalizar`);
+            return response.data;
+        } catch (error) {
+            console.error('Error finalizando subasta:', error);
+            throw error;
+        }
     }
 };
 

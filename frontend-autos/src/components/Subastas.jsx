@@ -2,6 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { subastaService } from '../services/api';
 
+const CountdownTimer = ({ fechaFin, onTimeUp, subastaId }) => {
+    const [timeLeft, setTimeLeft] = useState('');
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const now = new Date().getTime();
+            // Ajustamos la fecha de fin para que sea a las 23:59:59
+            const endDate = new Date(fechaFin);
+            endDate.setHours(23, 59, 59, 999);
+            const endTime = endDate.getTime();
+            const difference = endTime - now;
+
+            if (difference <= 0) {
+                setTimeLeft('Subasta finalizada');
+                if (onTimeUp) onTimeUp(subastaId);
+                return;
+            }
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+        };
+
+        calculateTimeLeft();
+        const timer = setInterval(calculateTimeLeft, 1000);
+
+        return () => clearInterval(timer);
+    }, [fechaFin, onTimeUp, subastaId]);
+
+    return (
+        <div className="text-sm font-medium">
+            Tiempo restante: <span className="text-indigo-600">{timeLeft}</span>
+        </div>
+    );
+};
+
 const Subastas = () => {
     const [subastas, setSubastas] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -38,6 +77,16 @@ const Subastas = () => {
             console.error('Error al cargar subastas:', err);
             setError('Error al cargar las subastas');
             setLoading(false);
+        }
+    };
+
+    const handleTimeUp = async (subastaId) => {
+        try {
+            await subastaService.finalizarSubasta(subastaId);
+            // Recargar las subastas para actualizar el estado
+            loadSubastas();
+        } catch (err) {
+            console.error('Error al finalizar la subasta:', err);
         }
     };
 
@@ -133,13 +182,24 @@ const Subastas = () => {
                             <div className="text-gray-600 mb-4">
                                 <h4 className="font-semibold text-gray-700 mb-2">Detalles de la Subasta</h4>
                                 <p>Precio Mínimo: ${subasta.precioMinimo}</p>
-                                <p>Fecha Inicio: {new Date(subasta.fechaInicio).toLocaleDateString()}</p>
-                                <p>Fecha Fin: {new Date(subasta.fechaFin).toLocaleDateString()}</p>
-                                <p>Estado: {subasta.activa ? 'Activa' : 'Inactiva'}</p>
+                                <p>Fecha Inicio: {subasta.fechaInicio}</p>
+                                <p>Fecha Fin: {subasta.fechaFin}</p>
+                                <p>Estado de la Subasta: {subasta.activa ? 'Activa' : 'Inactiva'}</p>
                                 {subasta.ganadorId && <p>Ganador ID: {subasta.ganadorId}</p>}
+                                
+                                {/* Contador regresivo */}
+                                {subasta.activa && (
+                                    <div className="mt-3 p-2 bg-indigo-50 rounded-md">
+                                        <CountdownTimer 
+                                            fechaFin={subasta.fechaFin} 
+                                            onTimeUp={handleTimeUp}
+                                            subastaId={subasta.autoId}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
-                            {hasRole('ROLE_COMPRADOR') && (
+                            {hasRole('ROLE_COMPRADOR') && subasta.activa && (
                                 <button
                                     onClick={() => handleSelectSubasta(subasta)}
                                     className="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition-colors"
@@ -170,9 +230,20 @@ const Subastas = () => {
                             <div>
                                 <h4 className="font-semibold text-gray-700">Detalles de la Subasta</h4>
                                 <p><span className="font-medium">Precio Mínimo:</span> ${selectedSubasta.precioMinimo}</p>
-                                <p><span className="font-medium">Fecha Inicio:</span> {new Date(selectedSubasta.fechaInicio).toLocaleDateString()}</p>
-                                <p><span className="font-medium">Fecha Fin:</span> {new Date(selectedSubasta.fechaFin).toLocaleDateString()}</p>
-                                <p><span className="font-medium">Estado:</span> {selectedSubasta.activa ? 'Activa' : 'Inactiva'}</p>
+                                <p><span className="font-medium">Fecha Inicio:</span> {selectedSubasta.fechaInicio}</p>
+                                <p><span className="font-medium">Fecha Fin:</span> {selectedSubasta.fechaFin}</p>
+                                <p><span className="font-medium">Estado de la Subasta:</span> {selectedSubasta.activa ? 'Activa' : 'Inactiva'}</p>
+                                
+                                {/* Contador regresivo en el modal */}
+                                {selectedSubasta.activa && (
+                                    <div className="mt-3 p-2 bg-indigo-50 rounded-md">
+                                        <CountdownTimer 
+                                            fechaFin={selectedSubasta.fechaFin}
+                                            onTimeUp={handleTimeUp}
+                                            subastaId={selectedSubasta.autoId}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
