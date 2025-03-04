@@ -194,7 +194,7 @@ export const vehicleService = {
     createVehicle: async (vehicleData) => {
         try {
             console.log('Creating vehicle with data:', vehicleData);
-            const response = await api.post('/vehiculo', vehicleData);
+            const response = await api.post('/vehiculo/create', vehicleData);
             return response.data;
         } catch (error) {
             console.error('Error creating vehicle:', error);
@@ -205,7 +205,7 @@ export const vehicleService = {
     updateVehicle: async (id, vehicleData) => {
         try {
             console.log('Updating vehicle with ID:', id, 'and data:', vehicleData);
-            const response = await api.put(`/vehiculo/update`, vehicleData);
+            const response = await api.put(`/vehiculo/update/${id}`, vehicleData);
             return response.data;
         } catch (error) {
             console.error('Error updating vehicle:', error);
@@ -216,7 +216,7 @@ export const vehicleService = {
     deleteVehicle: async (id) => {
         try {
             console.log('Deleting vehicle with ID:', id);
-            const response = await api.delete(`/vehiculo/${id}`);
+            const response = await api.delete(`/vehiculo/delete/${id}`);
             return response.data;
         } catch (error) {
             console.error('Error deleting vehicle:', error);
@@ -272,6 +272,21 @@ export const subastaService = {
             return response.data;
         } catch (error) {
             console.error('Error realizando puja:', error);
+            throw error;
+        }
+    },
+
+    getAutoDetails: async (autoId) => {
+        const response = await api.get(`/vehiculo/${autoId}`);
+        return response.data;
+    },
+
+    finalizarSubasta: async (subastaId) => {
+        try {
+            const response = await api.put(`/subasta/${subastaId}/finalizar`);
+            return response.data;
+        } catch (error) {
+            console.error('Error finalizando subasta:', error);
             throw error;
         }
     }
