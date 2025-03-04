@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { subastaService, authService, vehicleService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const MisSubastas = () => {
     const [subastas, setSubastas] = useState([]);
@@ -28,17 +29,27 @@ const MisSubastas = () => {
 
                 // Cargar vehículos del vendedor
                 const vehiclesData = await vehicleService.getVehiclesByVendedor(vendedorId);
-                // Filtrar solo los vehículos disponibles (no vendidos)
-                const availableVehicles = vehiclesData.filter(vehicle => !vehicle.estado);
-                setVehicles(availableVehicles);
-
+                
                 // Cargar subastas activas
                 const subastasData = await subastaService.getActiveSubastasByVendedor(vendedorId);
-                setSubastas(Array.isArray(subastasData) ? subastasData : []);
+                const subastasActivas = Array.isArray(subastasData) ? subastasData : [];
+                setSubastas(subastasActivas);
+
+                // Filtrar vehículos que no están en subasta activa
+                const autosEnSubasta = subastasActivas.map(subasta => subasta.autoId);
+                const availableVehicles = vehiclesData.filter(vehicle => 
+                    !vehicle.estado && !autosEnSubasta.includes(vehicle.id)
+                );
+                
+                if (vehiclesData.length > 0 && availableVehicles.length === 0) {
+                    toast.info('Todos tus vehículos disponibles ya están en subasta');
+                }
+                
+                setVehicles(availableVehicles);
                 setLoading(false);
             } catch (err) {
                 console.error('Error al cargar datos:', err);
-                setError(err.message || 'Error al cargar los datos');
+                toast.error(err.message || 'Error al cargar los datos');
                 setLoading(false);
             }
         };
@@ -163,7 +174,7 @@ const MisSubastas = () => {
                                 className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 required
                             >
-                                <option value="">Seleccione un vehículo</option>
+                                <option value="">Seleccione un vehículo disponible</option>
                                 {vehicles.map(vehicle => (
                                     <option key={vehicle.id} value={vehicle.id}>
                                         {vehicle.marca} {vehicle.modelo} ({vehicle.anio})
@@ -184,6 +195,8 @@ const MisSubastas = () => {
                                     disabled
                                 />
                             </div>
+
+                            
                         )}
 
                         <div>
@@ -213,6 +226,8 @@ const MisSubastas = () => {
                                 required
                             />
                         </div>
+
+
                     </div>
 
                     <div className="flex justify-end">
