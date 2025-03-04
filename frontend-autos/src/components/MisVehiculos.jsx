@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { vehicleService, authService } from '../services/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const MisVehiculos = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -40,7 +42,7 @@ const MisVehiculos = () => {
             setLoading(false);
         } catch (err) {
             console.error('Error al cargar los vehículos:', err);
-            setError('Error al cargar los vehículos');
+            toast.error('Error al cargar los vehículos');
             setLoading(false);
         }
     };
@@ -69,27 +71,27 @@ const MisVehiculos = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Asegurarse de que el ID del vendedor esté establecido
             const vehicleData = {
                 ...formData,
                 id_vendedor: currentUserId
             };
 
             if (isEditing) {
-                // Para actualizar, necesitamos adaptar los datos al formato esperado
                 const updateData = {
                     id: selectedVehicle.id,
-                    marca: formData.marca, // Usando marca como nombre
-                    modelo: formData.modelo, // Usando modelo como email
-                    anio: formData.anio, 
+                    marca: formData.marca,
+                    modelo: formData.modelo,
+                    anio: formData.anio,
                     precio_base: formData.precio_base,
                     estado: formData.estado,
-                    fecha_registro: new Date().toISOString().split('T')[0] // Fecha actual
+                    fecha_registro: new Date().toISOString().split('T')[0]
                 };
 
                 await vehicleService.updateVehicle(selectedVehicle.id, updateData);
+                toast.success('¡Vehículo actualizado con éxito!');
             } else {
                 await vehicleService.createVehicle(vehicleData);
+                toast.success('¡Vehículo creado con éxito!');
             }
 
             if (currentUserId) {
@@ -98,7 +100,7 @@ const MisVehiculos = () => {
             resetForm();
         } catch (err) {
             console.error('Error al guardar el vehículo:', err);
-            setError(isEditing ? 'Error al actualizar el vehículo' : 'Error al crear el vehículo');
+            toast.error(isEditing ? 'Error al actualizar el vehículo' : 'Error al crear el vehículo');
         }
     };
 
@@ -120,12 +122,13 @@ const MisVehiculos = () => {
         if (window.confirm('¿Estás seguro de que deseas eliminar este vehículo?')) {
             try {
                 await vehicleService.deleteVehicle(id);
+                toast.success('¡Vehículo eliminado con éxito!');
                 if (currentUserId) {
                     await loadVehicles(currentUserId);
                 }
             } catch (err) {
                 console.error('Error al eliminar el vehículo:', err);
-                setError('Error al eliminar el vehículo');
+                toast.error('Error al eliminar el vehículo');
             }
         }
     };
@@ -140,13 +143,19 @@ const MisVehiculos = () => {
 
     return (
         <div className="container mx-auto px-4">
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
             <h2 className="text-2xl font-bold mb-6">Mis Vehículos</h2>
-
-            {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {error}
-                </div>
-            )}
 
             {/* Formulario para crear/editar vehículo */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">

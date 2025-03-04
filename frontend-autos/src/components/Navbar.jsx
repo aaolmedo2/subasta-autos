@@ -6,6 +6,20 @@ const Navbar = () => {
     const { user, roles, logout, hasRole } = useAuth();
     const navigate = useNavigate();
 
+    const getUserEmail = () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.sub || 'No email';
+            } catch (error) {
+                console.error('Error getting email from token:', error);
+                return 'Error';
+            }
+        }
+        return '';
+    };
+
     const handleLogout = () => {
         logout();
         navigate('/login');
@@ -78,12 +92,18 @@ const Navbar = () => {
                         <div className="ml-4 flex items-center md:ml-6">
                             {user ? (
                                 <div className="flex items-center space-x-4">
-                                    <div className="text-gray-300 text-sm">
+                                    {/* <div className="text-gray-300 text-sm">
                                         Roles: {roles.join(', ')}
+                                    </div> */}
+                                    <div className="text-gray-300 text-sm">
+                                        <div>
+                                            Email: {getUserEmail()}
+                                        </div>
+                                        <span>Roles: {roles.join(', ')}</span>
                                     </div>
                                     <button
                                         onClick={handleLogout}
-                                        className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                        className="text-black-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                                     >
                                         Cerrar Sesión
                                     </button>

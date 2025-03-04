@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,7 +49,7 @@ public class AutoService {
             vehiculoToCreate.setAnio(autoDTO.getAnio());
             vehiculoToCreate.setPrecioBase(autoDTO.getPrecio_base());
             vehiculoToCreate.setVendido(autoDTO.isEstado());
-            vehiculoToCreate.setFechaCreacion(autoDTO.getFecha());
+            vehiculoToCreate.setFechaCreacion(LocalDate.now());
 
             // Guardar el vehículo en la base de datos
             autoRepository.save(vehiculoToCreate);
@@ -80,7 +81,7 @@ public class AutoService {
             existingAuto.setAnio(autoDTO.getAnio());
             existingAuto.setPrecioBase(autoDTO.getPrecio_base());
             existingAuto.setVendido(autoDTO.isEstado());
-            existingAuto.setFechaCreacion(autoDTO.getFecha());
+            //existingAuto.setFechaCreacion(autoDTO.getFecha());
 
             // Save the updated vehicle
             this.autoRepository.save(existingAuto);

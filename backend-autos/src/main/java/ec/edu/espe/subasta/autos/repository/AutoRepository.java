@@ -10,4 +10,5 @@ public interface AutoRepository extends JpaRepository<AutoEntity, Integer>{
     // Metodo para obtener todos los autos de un vendedor específico
     List<AutoEntity> findByVendedorId(Long vendedorId);
     List<AutoEntity> findByVendido(Boolean vendido);
+
 }

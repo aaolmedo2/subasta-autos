@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { subastaService } from '../services/api';
 import { Navigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CountdownTimer = ({ fechaFin, onTimeUp, subastaId }) => {
     const [timeLeft, setTimeLeft] = useState('');
@@ -50,6 +52,7 @@ const Subastas = () => {
     const [selectedAutoDetails, setSelectedAutoDetails] = useState(null);
     const [pujaAmount, setPujaAmount] = useState('');
     const [autosDetails, setAutosDetails] = useState({});
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const { hasRole } = useAuth();
 
     useEffect(() => {
@@ -111,20 +114,21 @@ const Subastas = () => {
         try {
             const monto = parseFloat(pujaAmount);
             if (isNaN(monto) || monto <= 0) {
-                setError('El monto de la puja debe ser un número positivo');
+                toast.error('El monto de la puja debe ser un número positivo');
                 return;
             }
 
             if (monto < selectedSubasta.precioMinimo) {
-                setError(`El monto debe ser mayor o igual a $${selectedSubasta.precioMinimo}`);
+                toast.error(`El monto debe ser mayor o igual a $${selectedSubasta.precioMinimo}`);
                 return;
             }
 
             await subastaService.realizarPuja(
-                selectedSubasta.id, // Usando autoId como subastaId
+                selectedSubasta.id,
                 monto
             );
 
+            toast.success('¡Puja realizada con éxito!');
             await loadSubastas();
             setSelectedSubasta(null);
             setSelectedAutoDetails(null);
@@ -132,7 +136,7 @@ const Subastas = () => {
             setError('');
         } catch (err) {
             console.error('Error al realizar puja:', err);
-            setError(err.message || 'Error al realizar la puja');
+            toast.error(err.message || 'Error al realizar la puja');
         }
     };
 
@@ -158,6 +162,18 @@ const Subastas = () => {
 
     return (
         <div className="container mx-auto px-4">
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
             <h2 className="text-2xl font-bold mb-6">Subastas Activas</h2>
 
             {error && (
