@@ -41,10 +41,10 @@ const Dashboard = () => {
                                 </p>
                             </div>
                             <div
-                                onClick={() => navigate('/subastas')}
+                                onClick={() => navigate('/subastasActivas')}
                                 className="bg-indigo-50 p-6 rounded-lg cursor-pointer hover:bg-indigo-100 transition-colors"
                             >
-                                <h3 className="text-lg font-semibold mb-2">Subastas Activas</h3>
+                                <h3 className="text-lg font-semibold mb-2">Mis Subastas</h3>
                                 <p className="text-gray-600">
                                     Ver todas las subastas disponibles
                                 </p>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { subastaService } from '../services/api';
+import { Navigate } from 'react-router-dom';
 
 const Subastas = () => {
     const [subastas, setSubastas] = useState([]);
@@ -11,8 +12,10 @@ const Subastas = () => {
     const { hasRole } = useAuth();
 
     useEffect(() => {
-        loadSubastas();
-    }, []);
+        if (hasRole('ROLE_COMPRADOR')) {
+            loadSubastas();
+        }
+    }, [hasRole]);
 
     const loadSubastas = async () => {
         try {
@@ -46,7 +49,7 @@ const Subastas = () => {
             }
 
             await subastaService.realizarPuja(
-                selectedSubasta.autoId, // Usando autoId como subastaId
+                selectedSubasta.id, // Usando autoId como subastaId
                 monto
             );
 
@@ -60,6 +63,11 @@ const Subastas = () => {
             setError(err.message || 'Error al realizar la puja');
         }
     };
+
+    // Redirigir si no es un comprador
+    if (!hasRole('ROLE_COMPRADOR')) {
+        return <Navigate to="/" replace />;
+    }
 
     if (loading) {
         return (
@@ -82,7 +90,7 @@ const Subastas = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {subastas.map((subasta) => (
                     <div
-                        key={subasta.autoId}
+                        key={subasta.id}
                         className="bg-white rounded-lg shadow-md overflow-hidden"
                     >
                         <div className="p-6">
@@ -95,14 +103,12 @@ const Subastas = () => {
                                 {subasta.ganadorId && <p>Ganador ID: {subasta.ganadorId}</p>}
                             </div>
 
-                            {hasRole('ROLE_COMPRADOR') && (
-                                <button
-                                    onClick={() => setSelectedSubasta(subasta)}
-                                    className="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition-colors"
-                                >
-                                    Realizar Puja
-                                </button>
-                            )}
+                            <button
+                                onClick={() => setSelectedSubasta(subasta)}
+                                className="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition-colors"
+                            >
+                                Realizar Puja
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -113,7 +119,7 @@ const Subastas = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full">
                         <h3 className="text-xl font-semibold mb-4">
-                            Realizar Puja - Auto ID: {selectedSubasta.autoId}
+                            Realizar Puja - Subasta ID: {selectedSubasta.id}
                         </h3>
                         <form onSubmit={handlePuja}>
                             <div className="mb-4">
@@ -137,7 +143,7 @@ const Subastas = () => {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setSelectedSubasta(null);
+                                        setSelectedSubasta(selectedSubasta.id);
                                         setPujaAmount('');
                                         setError(''); // Limpiar cualquier error al cerrar el modal
                                     }}

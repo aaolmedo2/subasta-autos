@@ -9,6 +9,7 @@ import Subastas from './components/Subastas';
 import MisVehiculos from './components/MisVehiculos';
 import Usuarios from './components/Usuarios';
 import Vehiculos from './components/Vehiculos';
+import MisSubastas from './components/MisSubastas';
 
 const PrivateRoute = ({ children, allowedRoles = [] }) => {
   const { user, loading, hasAnyRole } = useAuth();
@@ -48,10 +49,18 @@ const App = () => {
                   }
                 />
                 <Route
+                  path="/subastasActivas"
+                  element={
+                    <PrivateRoute allowedRoles={['ROLE_COMPRADOR']}>
+                      <Subastas />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
                   path="/subastas"
                   element={
-                    <PrivateRoute allowedRoles={['ROLE_COMPRADOR', 'ROLE_VENDEDOR']}>
-                      <Subastas />
+                    <PrivateRoute allowedRoles={['ROLE_VENDEDOR']}>
+                      <MisSubastas />
                     </PrivateRoute>
                   }
                 />

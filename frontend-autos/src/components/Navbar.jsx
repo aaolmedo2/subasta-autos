@@ -31,16 +31,24 @@ const Navbar = () => {
                                         Dashboard
                                     </Link>
                                     {hasRole('ROLE_VENDEDOR') && (
-                                        <Link
-                                            to="/mis-vehiculos"
-                                            className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                                        >
-                                            Mis Vehículos
-                                        </Link>
+                                        <>
+                                            <Link
+                                                to="/mis-vehiculos"
+                                                className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                            >
+                                                Mis Vehículos
+                                            </Link>
+                                            <Link
+                                                to="/subastas"
+                                                className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                                            >
+                                                Mis Subastas Activas
+                                            </Link>
+                                        </>
                                     )}
-                                    {(hasRole('ROLE_COMPRADOR') || hasRole('ROLE_VENDEDOR')) && (
+                                    {(hasRole('ROLE_COMPRADOR')) && (
                                         <Link
-                                            to="/subastas"
+                                            to="/subastasActivas"
                                             className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                                         >
                                             Subastas Activas

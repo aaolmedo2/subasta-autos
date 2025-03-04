@@ -1,6 +1,7 @@
 package ec.edu.espe.subasta.autos.service;
 
 import ec.edu.espe.subasta.autos.api.DTO.SubastaDTO;
+import ec.edu.espe.subasta.autos.api.DTO.SubastaDTOc;
 import ec.edu.espe.subasta.autos.entity.AutoEntity;
 import ec.edu.espe.subasta.autos.entity.PujaEntity;
 import ec.edu.espe.subasta.autos.entity.SubastaEntity;
@@ -53,11 +54,25 @@ public class SubastaService {
         return convertToDTO(subastaRepository.save(subasta));
     }
 
-    public List<SubastaDTO> obtenerSubastasActivas() {
+    public List<SubastaDTOc> obtenerSubastasActivas() {
         return subastaRepository.findByActivaTrue()
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::convertToDTOc)
                 .collect(Collectors.toList());
+    }
+
+    public List<SubastaDTO> obtenerSubastasActivasMine(Long vendedorId) {
+        try {
+            // Obtener las subastas activas del vendedor desde el repositorio
+            List<SubastaEntity> subastasActivas = subastaRepository.findSubastasActivasByVendedorId(vendedorId);
+
+            // Convertir las entidades a DTOs
+            return subastasActivas.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener las subastas del vendedor", e);
+        }
     }
 
     public SubastaDTO obtenerSubasta(Integer id) {
@@ -118,4 +133,19 @@ public class SubastaService {
         }
         return dto;
     }
+
+    private SubastaDTOc convertToDTOc(SubastaEntity entity) {
+        SubastaDTOc dto = new SubastaDTOc();
+        dto.setId(entity.getId());
+        dto.setAutoId(entity.getAuto().getId());
+        dto.setFechaInicio(entity.getFechaInicio());
+        dto.setFechaFin(entity.getFechaFin());
+        dto.setPrecioMinimo(entity.getPrecioMinimo());
+        dto.setActiva(entity.getActiva());
+        if (entity.getGanador() != null) {
+            dto.setGanadorId(entity.getGanador().getId());
+        }
+        return dto;
+    }
+
 } 

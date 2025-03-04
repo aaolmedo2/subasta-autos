@@ -28,16 +28,19 @@ export const authService = {
             const response = await api.post('/auth/login', credentials);
             console.log('Login response:', response.data);
 
-            // Verificar si la respuesta contiene un token directamente o dentro de un objeto
             const token = response.data.token || response.data;
 
             if (token) {
                 console.log('Token received, storing in localStorage');
                 localStorage.setItem('token', token);
 
-                // Guardar el email del usuario para futuras referencias
-                if (credentials.email) {
-                    localStorage.setItem('userEmail', credentials.email);
+                // Decodificar y mostrar la información del token para depuración
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    console.log('Token payload after login:', payload);
+                    console.log('User roles:', payload.authority);
+                } catch (error) {
+                    console.error('Error decoding token after login:', error);
                 }
             } else {
                 console.error('No token found in response:', response.data);
@@ -57,15 +60,13 @@ export const authService = {
 
     logout: () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('userEmail');
-        userIdCache.clear();
     },
 
     getCurrentUserRoles: () => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
-                console.log('Parsing token:', token);
+                console.log('Getting roles from token:', token);
                 const parts = token.split('.');
                 if (parts.length !== 3) {
                     console.error('Invalid token format');
@@ -73,23 +74,30 @@ export const authService = {
                 }
 
                 const payload = JSON.parse(atob(parts[1]));
-                console.log('Token payload:', payload);
+                console.log('Token payload for roles:', payload);
 
-                // Check if authority exists and split it into roles
                 if (payload.authority) {
                     console.log('Authority found:', payload.authority);
-                    // Handle both single role and multiple roles cases
-                    return typeof payload.authority === 'string'
-                        ? payload.authority.split(',')
-                        : [payload.authority];
+                    // Manejar tanto string como array
+                    if (typeof payload.authority === 'string') {
+                        // Si es una cadena, dividir por comas y limpiar espacios
+                        const roles = payload.authority.split(',').map(role => role.trim());
+                        console.log('Roles procesados desde string:', roles);
+                        return roles;
+                    } else if (Array.isArray(payload.authority)) {
+                        // Si ya es un array, usarlo directamente
+                        console.log('Roles desde array:', payload.authority);
+                        return payload.authority;
+                    }
+                    return [payload.authority]; // Si es un solo valor no string
                 } else {
                     console.error('No authority field found in token');
                 }
             } catch (error) {
-                console.error('Error parsing JWT:', error);
+                console.error('Error parsing JWT for roles:', error);
             }
         } else {
-            console.log('No token found in localStorage');
+            console.log('No token found for getting roles');
         }
         return [];
     },
@@ -99,22 +107,18 @@ export const authService = {
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                // Intentar obtener el ID del usuario del token
+                console.log('Getting user ID from payload:', payload);
+                // Obtener el userId del token
                 if (payload.userId) {
-                    return payload.userId;
+                    console.log('Found userId in token:', payload.userId);
+                    return parseInt(payload.userId);
                 }
-
-                // Si no está en el token, intentar obtenerlo del email
-                const userEmail = localStorage.getItem('userEmail');
-                if (userEmail && userIdCache.has(userEmail)) {
-                    return userIdCache.get(userEmail);
-                }
-
-                // Si no tenemos el ID, usamos el sub (email) como identificador temporal
-                return payload.sub;
+                console.error('No userId found in token payload:', payload);
             } catch (error) {
                 console.error('Error getting user ID from token:', error);
             }
+        } else {
+            console.log('No token found for getting user ID');
         }
         return null;
     },
@@ -146,14 +150,19 @@ export const authService = {
     hasRole: (roleToCheck) => {
         const roles = authService.getCurrentUserRoles();
         console.log('Checking role:', roleToCheck, 'against user roles:', roles);
-        return roles.some(role => role.trim() === roleToCheck.trim());
+        // Normalizar la comparación convirtiendo todo a mayúsculas
+        return roles.some(role =>
+            role.trim().toUpperCase() === roleToCheck.trim().toUpperCase()
+        );
     },
 
     hasAnyRole: (rolesToCheck) => {
         const userRoles = authService.getCurrentUserRoles();
         console.log('Checking roles:', rolesToCheck, 'against user roles:', userRoles);
         return rolesToCheck.some(role =>
-            userRoles.some(userRole => userRole.trim() === role.trim())
+            userRoles.some(userRole =>
+                userRole.trim().toUpperCase() === role.trim().toUpperCase()
+            )
         );
     }
 };
@@ -228,41 +237,32 @@ export const subastaService = {
         }
     },
 
+    getActiveSubastasByVendedor: async (vendedorId) => {
+        try {
+            console.log('Intentando obtener subastas para vendedor:', vendedorId);
+            const response = await api.get(`/subasta/activasMine/${vendedorId}`);
+            console.log('Respuesta completa de subastas del vendedor:', response);
+            console.log('Subastas activas del vendedor:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Error completo al obtener subastas del vendedor:', error);
+            console.error('Error response:', error.response);
+            throw error;
+        }
+    },
+
     realizarPuja: async (subastaId, monto) => {
         try {
-            // Obtener el email del usuario actual
-            const userEmail = localStorage.getItem('userEmail');
-            let compradorId = null;
-
-            // Intentar obtener el ID del usuario
-            if (userEmail) {
-                // Primero intentamos obtener el ID del caché
-                if (userIdCache.has(userEmail)) {
-                    compradorId = userIdCache.get(userEmail);
-                } else {
-                    // Si no está en caché, intentamos obtenerlo del backend
-                    compradorId = await authService.getUserIdByEmail(userEmail);
-                }
-            }
-
-            // Si no pudimos obtener el ID, usamos el ID del token
-            if (!compradorId) {
-                compradorId = authService.getCurrentUserId();
-            }
+            // Obtener el ID del usuario directamente del token JWT
+            const compradorId = authService.getCurrentUserId();
 
             if (!compradorId) {
-                throw new Error('No se pudo obtener el ID del usuario');
-            }
-
-            // Asegurarse de que compradorId sea un número
-            if (isNaN(parseInt(compradorId))) {
-                console.error('compradorId no es un número:', compradorId);
-                throw new Error('El ID del comprador debe ser un número');
+                throw new Error('No se pudo obtener el ID del usuario del token');
             }
 
             const pujaData = {
                 subastaId: parseInt(subastaId),
-                compradorId: parseInt(compradorId),
+                compradorId: compradorId, // Ya es un número desde getCurrentUserId
                 monto: parseFloat(monto),
                 fechaPuja: new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD
             };

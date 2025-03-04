@@ -29,6 +29,11 @@ public class SubastaController {
         return ResponseEntity.ok(subastaService.obtenerSubastasActivas());
     }
 
+    @GetMapping("/activasMine/{vendedorId}")
+    public ResponseEntity<?> obtenerSubastasActivasMine(@PathVariable Long vendedorId) {
+        return ResponseEntity.ok(subastaService.obtenerSubastasActivasMine(vendedorId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerSubasta(@PathVariable Integer id) {
         try {
