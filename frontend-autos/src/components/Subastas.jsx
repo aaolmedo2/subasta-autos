@@ -95,6 +95,7 @@ const Subastas = () => {
                     >
                         <div className="p-6">
                             <h3 className="text-xl font-semibold mb-2">Auto ID: {subasta.autoId}</h3>
+                            <h3 className="text-xl font-semibold mb-2">Subasta ID: {subasta.id}</h3>
                             <div className="text-gray-600 mb-4">
                                 <p>Precio Mínimo: ${subasta.precioMinimo}</p>
                                 <p>Fecha Inicio: {new Date(subasta.fechaInicio).toLocaleDateString()}</p>
