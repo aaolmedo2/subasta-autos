@@ -63,7 +63,7 @@ const Subastas = () => {
             const data = await subastaService.getActiveSubastas();
             console.log('Subastas cargadas:', data);
             setSubastas(data);
-            
+
             // Cargar los detalles de todos los autos
             const autosDetailsMap = {};
             for (const subasta of data) {
@@ -175,7 +175,7 @@ const Subastas = () => {
                         <div className="p-6">
                             <h3 className="text-xl font-semibold mb-2">Auto ID: {subasta.autoId}</h3>
                             <h3 className="text-xl font-semibold mb-2">Subasta ID: {subasta.id}</h3>
-                            
+
                             {/* Información del Vehículo */}
                             {autosDetails[subasta.autoId] && (
                                 <div className="bg-gray-50 p-4 rounded-lg mb-4">
@@ -195,12 +195,12 @@ const Subastas = () => {
                                 <p>Fecha Fin: {subasta.fechaFin}</p>
                                 <p>Estado de la Subasta: {subasta.activa ? 'Activa' : 'Inactiva'}</p>
                                 {subasta.ganadorId && <p>Ganador ID: {subasta.ganadorId}</p>}
-                                
+
                                 {/* Contador regresivo */}
                                 {subasta.activa && (
                                     <div className="mt-3 p-2 bg-indigo-50 rounded-md">
-                                        <CountdownTimer 
-                                            fechaFin={subasta.fechaFin} 
+                                        <CountdownTimer
+                                            fechaFin={subasta.fechaFin}
                                             onTimeUp={handleTimeUp}
                                             subastaId={subasta.autoId}
                                         />
@@ -216,12 +216,12 @@ const Subastas = () => {
                                     Realizar Puja
                                 </button>
                             )}
-                            /*<button
+                            {/* <button
                                 onClick={() => setSelectedSubasta(subasta)}
                                 className="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition-colors"
                             >
                                 Realizar Puja
-                            </button>*/
+                            </button> */}
                         </div>
                     </div>
                 ))}
@@ -249,11 +249,11 @@ const Subastas = () => {
                                 <p><span className="font-medium">Fecha Inicio:</span> {selectedSubasta.fechaInicio}</p>
                                 <p><span className="font-medium">Fecha Fin:</span> {selectedSubasta.fechaFin}</p>
                                 <p><span className="font-medium">Estado de la Subasta:</span> {selectedSubasta.activa ? 'Activa' : 'Inactiva'}</p>
-                                
+
                                 {/* Contador regresivo en el modal */}
                                 {selectedSubasta.activa && (
                                     <div className="mt-3 p-2 bg-indigo-50 rounded-md">
-                                        <CountdownTimer 
+                                        <CountdownTimer
                                             fechaFin={selectedSubasta.fechaFin}
                                             onTimeUp={handleTimeUp}
                                             subastaId={selectedSubasta.autoId}
