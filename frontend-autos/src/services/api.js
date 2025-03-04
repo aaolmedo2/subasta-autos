@@ -274,6 +274,11 @@ export const subastaService = {
             console.error('Error realizando puja:', error);
             throw error;
         }
+    },
+
+    getAutoDetails: async (autoId) => {
+        const response = await api.get(`/vehiculo/${autoId}`);
+        return response.data;
     }
 };
 

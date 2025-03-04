@@ -7,7 +7,9 @@ const Subastas = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedSubasta, setSelectedSubasta] = useState(null);
+    const [selectedAutoDetails, setSelectedAutoDetails] = useState(null);
     const [pujaAmount, setPujaAmount] = useState('');
+    const [autosDetails, setAutosDetails] = useState({});
     const { hasRole } = useAuth();
 
     useEffect(() => {
@@ -19,6 +21,18 @@ const Subastas = () => {
             const data = await subastaService.getActiveSubastas();
             console.log('Subastas cargadas:', data);
             setSubastas(data);
+            
+            // Cargar los detalles de todos los autos
+            const autosDetailsMap = {};
+            for (const subasta of data) {
+                try {
+                    const autoDetails = await subastaService.getAutoDetails(subasta.autoId);
+                    autosDetailsMap[subasta.autoId] = autoDetails;
+                } catch (err) {
+                    console.error(`Error al cargar detalles del auto ${subasta.autoId}:`, err);
+                }
+            }
+            setAutosDetails(autosDetailsMap);
             setLoading(false);
         } catch (err) {
             console.error('Error al cargar subastas:', err);
@@ -27,38 +41,54 @@ const Subastas = () => {
         }
     };
 
+    const handleSelectSubasta = async (subasta) => {
+        try {
+            const autoDetails = await subastaService.getAutoDetails(subasta.autoId);
+            setSelectedAutoDetails(autoDetails);
+            setSelectedSubasta(subasta);
+        } catch (err) {
+            console.error('Error al cargar detalles del auto:', err);
+            setError('Error al cargar los detalles del vehículo');
+        }
+    };
+
     const handlePuja = async (e) => {
         e.preventDefault();
         if (!selectedSubasta || !pujaAmount) return;
 
         try {
-            // Convertir el monto a número y validar
             const monto = parseFloat(pujaAmount);
             if (isNaN(monto) || monto <= 0) {
                 setError('El monto de la puja debe ser un número positivo');
                 return;
             }
 
-            // Asegurarse de que el monto sea mayor o igual al precio mínimo
             if (monto < selectedSubasta.precioMinimo) {
                 setError(`El monto debe ser mayor o igual a $${selectedSubasta.precioMinimo}`);
                 return;
             }
 
             await subastaService.realizarPuja(
-                selectedSubasta.autoId, // Usando autoId como subastaId
+                selectedSubasta.autoId,
                 monto
             );
 
-            // Reload subastas to get updated data
             await loadSubastas();
             setSelectedSubasta(null);
+            setSelectedAutoDetails(null);
             setPujaAmount('');
-            setError(''); // Limpiar cualquier error previo
+            setError('');
         } catch (err) {
             console.error('Error al realizar puja:', err);
             setError(err.message || 'Error al realizar la puja');
         }
+    };
+
+    const closeModal = () => {
+        setSelectedSubasta(null);
+        setSelectedAutoDetails(null);
+        setPujaAmount('');
+        setError('');
     };
 
     if (loading) {
@@ -86,8 +116,22 @@ const Subastas = () => {
                         className="bg-white rounded-lg shadow-md overflow-hidden"
                     >
                         <div className="p-6">
-                            <h3 className="text-xl font-semibold mb-2">Auto ID: {subasta.autoId}</h3>
+                            <h3 className="text-xl font-semibold mb-2">Subasta #{subasta.autoId}</h3>
+                            
+                            {/* Información del Vehículo */}
+                            {autosDetails[subasta.autoId] && (
+                                <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                                    <h4 className="font-semibold text-gray-700 mb-2">Información del Vehículo</h4>
+                                    <p><span className="font-medium">Marca:</span> {autosDetails[subasta.autoId].marca}</p>
+                                    <p><span className="font-medium">Modelo:</span> {autosDetails[subasta.autoId].modelo}</p>
+                                    <p><span className="font-medium">Año:</span> {autosDetails[subasta.autoId].anio}</p>
+                                    <p><span className="font-medium">Precio Base:</span> ${autosDetails[subasta.autoId].precio_base}</p>
+                                </div>
+                            )}
+
+                            {/* Información de la Subasta */}
                             <div className="text-gray-600 mb-4">
+                                <h4 className="font-semibold text-gray-700 mb-2">Detalles de la Subasta</h4>
                                 <p>Precio Mínimo: ${subasta.precioMinimo}</p>
                                 <p>Fecha Inicio: {new Date(subasta.fechaInicio).toLocaleDateString()}</p>
                                 <p>Fecha Fin: {new Date(subasta.fechaFin).toLocaleDateString()}</p>
@@ -97,7 +141,7 @@ const Subastas = () => {
 
                             {hasRole('ROLE_COMPRADOR') && (
                                 <button
-                                    onClick={() => setSelectedSubasta(subasta)}
+                                    onClick={() => handleSelectSubasta(subasta)}
                                     className="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition-colors"
                                 >
                                     Realizar Puja
@@ -108,13 +152,30 @@ const Subastas = () => {
                 ))}
             </div>
 
-            {/* Modal para realizar puja */}
-            {selectedSubasta && (
+            {/* Modal para realizar puja con detalles del auto */}
+            {selectedSubasta && selectedAutoDetails && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                    <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
                         <h3 className="text-xl font-semibold mb-4">
-                            Realizar Puja - Auto ID: {selectedSubasta.autoId}
+                            Detalles del Vehículo en Subasta
                         </h3>
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <h4 className="font-semibold text-gray-700">Información del Vehículo</h4>
+                                <p><span className="font-medium">Marca:</span> {selectedAutoDetails.marca}</p>
+                                <p><span className="font-medium">Modelo:</span> {selectedAutoDetails.modelo}</p>
+                                <p><span className="font-medium">Año:</span> {selectedAutoDetails.anio}</p>
+                                <p><span className="font-medium">Precio Base:</span> ${selectedAutoDetails.precio_base}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700">Detalles de la Subasta</h4>
+                                <p><span className="font-medium">Precio Mínimo:</span> ${selectedSubasta.precioMinimo}</p>
+                                <p><span className="font-medium">Fecha Inicio:</span> {new Date(selectedSubasta.fechaInicio).toLocaleDateString()}</p>
+                                <p><span className="font-medium">Fecha Fin:</span> {new Date(selectedSubasta.fechaFin).toLocaleDateString()}</p>
+                                <p><span className="font-medium">Estado:</span> {selectedSubasta.activa ? 'Activa' : 'Inactiva'}</p>
+                            </div>
+                        </div>
+
                         <form onSubmit={handlePuja}>
                             <div className="mb-4">
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -136,11 +197,7 @@ const Subastas = () => {
                             <div className="flex justify-end space-x-4">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setSelectedSubasta(null);
-                                        setPujaAmount('');
-                                        setError(''); // Limpiar cualquier error al cerrar el modal
-                                    }}
+                                    onClick={closeModal}
                                     className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400 transition-colors"
                                 >
                                     Cancelar
