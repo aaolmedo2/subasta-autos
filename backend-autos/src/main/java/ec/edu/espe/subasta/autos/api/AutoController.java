@@ -44,9 +44,9 @@ public class AutoController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMINISTRADOR', 'ROLE_VENDEDOR', 'ROLE_COMPRADOR')")
     //update vehicle seller
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateVehicle(@RequestBody AutoDTO autoDTO) {
+    public ResponseEntity<?> updateVehicle(@PathVariable Integer id, @RequestBody AutoDTO autoDTO) {
         try {
-            this.autoService.update(autoDTO);
+            this.autoService.update(id, autoDTO);
             return ResponseEntity.ok().body("Vehículo actualizado exitosamente");
         } catch (DocumentNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -67,8 +67,8 @@ public class AutoController {
 
     // Delete vehicle
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteVehicle(AutoDTO autoDTO) throws DeleteException {
-        autoService.delete(autoDTO);
+    public ResponseEntity<Void> deleteVehicle(@PathVariable Integer id) throws DeleteException {
+        autoService.delete(id);
         return ResponseEntity.ok().build();
     }
 

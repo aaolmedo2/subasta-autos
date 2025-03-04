@@ -1,7 +1,5 @@
 package ec.edu.espe.subasta.autos.api.DTO;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -15,21 +13,6 @@ public class AutoDTO {
     private Float precio_base;
     private boolean estado;
     private LocalDate fecha;
-
-
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Integer id;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-
 
     public Integer getId_vendedor() {
         return id_vendedor;

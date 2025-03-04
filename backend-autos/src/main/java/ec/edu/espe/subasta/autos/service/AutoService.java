@@ -62,19 +62,16 @@ public class AutoService {
     }
 
     //update vehicle (regular update - no id_vendedor change)
-    public void update(AutoDTO autoDTO) throws Exception {
+    public void update(Integer id, AutoDTO autoDTO) throws Exception {
         try {
             // Find the vehicle
-            AutoEntity existingAuto = this.autoRepository.findById(autoDTO.getId())
+            AutoEntity existingAuto = this.autoRepository.findById(id)
                     .orElseThrow(() -> new DocumentNotFoundException("Auto no encontrado", AutoEntity.class.getName()));
 
             // Validate the new data
             validateAutoData(autoDTO);
 
             // Update fields (excluding id_vendedor)
-
-            existingAuto.setId(autoDTO.getId());
-
             existingAuto.setMarca(autoDTO.getMarca());
             existingAuto.setModelo(autoDTO.getModelo());
             existingAuto.setAnio(autoDTO.getAnio());
@@ -94,9 +91,9 @@ public class AutoService {
     }
 
     //delete vehicle
-    public void delete(AutoDTO autoDTO) throws DeleteException {
+    public void delete(Integer id) throws DeleteException {
         try {
-            Optional<AutoEntity> autoEntityOptional = this.autoRepository.findById(autoDTO.getId());
+            Optional<AutoEntity> autoEntityOptional = this.autoRepository.findById(id);
 
             if (!autoEntityOptional.isPresent()) {
                 this.msgError = "Auto doesn't exist";
@@ -187,10 +184,7 @@ public class AutoService {
             // Convertir entidades a DTOs
             List<AutoDTO> autoDTOs = autoEntities.stream()
                     .map(autoEntity -> {
-
                         AutoDTO autoDTO = new AutoDTO();
-
-                        autoDTO.setId(autoEntity.getId());
                         autoDTO.setMarca(autoEntity.getMarca());
                         autoDTO.setModelo(autoEntity.getModelo());
                         autoDTO.setAnio(autoEntity.getAnio());

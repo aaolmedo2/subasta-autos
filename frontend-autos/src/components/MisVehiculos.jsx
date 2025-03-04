@@ -78,16 +78,14 @@ const MisVehiculos = () => {
             if (isEditing) {
                 // Para actualizar, necesitamos adaptar los datos al formato esperado
                 const updateData = {
-                    id: selectedVehicle.id,
-                    marca: formData.marca, // Usando marca como nombre
-                    modelo: formData.modelo, // Usando modelo como email
-                    anio: formData.anio, 
-                    precio_base: formData.precio_base,
-                    estado: formData.estado,
+                    nombre: formData.marca, // Usando marca como nombre
+                    email: formData.modelo, // Usando modelo como email
+                    password: "", // Campo vacío
+                    activo: formData.estado,
                     fecha_registro: new Date().toISOString().split('T')[0] // Fecha actual
                 };
 
-                await vehicleService.updateVehicle(selectedVehicle.id, updateData);
+                await vehicleService.updateVehicle(selectedVehicle.id_vendedor, updateData);
             } else {
                 await vehicleService.createVehicle(vehicleData);
             }
@@ -105,7 +103,6 @@ const MisVehiculos = () => {
     const handleEdit = (vehicle) => {
         setSelectedVehicle(vehicle);
         setFormData({
-            id: vehicle.id,
             marca: vehicle.marca,
             modelo: vehicle.modelo,
             anio: vehicle.anio,
@@ -245,14 +242,12 @@ const MisVehiculos = () => {
                 {vehicles.map((vehicle) => (
                     <div
                         key={vehicle.id_vendedor}
-
                         className="bg-white rounded-lg shadow-md overflow-hidden"
                     >
                         <div className="p-6">
                             <h3 className="text-xl font-semibold mb-2">{vehicle.marca} {vehicle.modelo}</h3>
                             <div className="text-gray-600 mb-4">
                                 <p>Año: {vehicle.anio}</p>
-                                <p>ID: {vehicle.id}</p>
                                 <p>Precio Base: ${vehicle.precio_base}</p>
                                 <p>Estado: {vehicle.estado ? 'Disponible' : 'No disponible'}</p>
                                 {vehicle.fecha && <p>Fecha: {new Date(vehicle.fecha).toLocaleDateString()}</p>}
@@ -265,7 +260,7 @@ const MisVehiculos = () => {
                                     Editar
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(vehicle.id)}
+                                    onClick={() => handleDelete(vehicle.id_vendedor)}
                                     className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors"
                                 >
                                     Eliminar
