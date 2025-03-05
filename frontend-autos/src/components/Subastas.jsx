@@ -249,6 +249,7 @@ const Subastas = () => {
                     <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
                         <h3 className="text-xl font-semibold mb-4">
                             Realizar Puja - Subasta ID: {selectedSubasta.id}
+                            <br />
                             Detalles del Vehículo en Subasta
                         </h3>
                         <div className="grid grid-cols-2 gap-4 mb-6">

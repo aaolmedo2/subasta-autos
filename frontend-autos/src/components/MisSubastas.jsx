@@ -36,14 +36,14 @@ const MisSubastas = () => {
                 const subastasActivas = Array.isArray(subastasData) ? subastasData : [];
                 setSubastas(subastasActivas);
 
-                // Filtrar vehículos que no están en subasta activa
+                // Filtrar vehículos que están disponibles y no están en subasta activa
                 const autosEnSubasta = subastasActivas.map(subasta => subasta.autoId);
                 const availableVehicles = vehiclesData.filter(vehicle =>
-                    !vehicle.estado && !autosEnSubasta.includes(vehicle.id)
+                    vehicle.estado && !autosEnSubasta.includes(vehicle.id)
                 );
 
                 if (vehiclesData.length > 0 && availableVehicles.length === 0) {
-                    toast.info('Todos tus vehículos disponibles ya están en subasta');
+                    toast.info('No hay vehículos disponibles para subastar');
                 }
 
                 setVehicles(availableVehicles);
@@ -132,7 +132,6 @@ const MisSubastas = () => {
             });
             setSelectedVehicle(null);
 
-            
         } catch (err) {
             console.error('Error al crear la subasta:', err);
             setError(err.message || 'Error al crear la subasta');

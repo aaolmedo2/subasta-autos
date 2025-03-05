@@ -11,6 +11,7 @@ import Usuarios from './components/Usuarios';
 import Vehiculos from './components/Vehiculos';
 import MisSubastas from './components/MisSubastas';
 import MisVehiculosC from './components/MisVehiculosC';
+import Footer from './components/Footer';
 
 const PrivateRoute = ({ children, allowedRoles = [] }) => {
   const { user, loading, hasAnyRole } = useAuth();
@@ -34,10 +35,10 @@ const App = () => {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen bg-gray-100">
+        <div className="flex flex-col min-h-screen">
           <Navbar />
-          <main className="py-10">
-            <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          <main className="flex-1 bg-gray-100 py-6">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -101,6 +102,7 @@ const App = () => {
               </Routes>
             </div>
           </main>
+          <Footer />
         </div>
       </AuthProvider>
     </Router>

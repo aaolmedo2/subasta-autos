@@ -38,11 +38,11 @@ const MisVehiculos = () => {
         try {
             // Cargar vehículos
             const vehiclesData = await vehicleService.getVehiclesByVendedor(vendedorId);
-            
+
             // Cargar subastas activas
             const subastasData = await subastaService.getActiveSubastasByVendedor(vendedorId);
             setSubastasActivas(Array.isArray(subastasData) ? subastasData : []);
-            
+
             setVehicles(vehiclesData);
             setLoading(false);
         } catch (err) {
@@ -54,7 +54,7 @@ const MisVehiculos = () => {
 
     // Función para verificar si un vehículo está en subasta activa
     const isVehicleInAuction = (vehicleId) => {
-        return subastasActivas.some(subasta => 
+        return subastasActivas.some(subasta =>
             subasta.autoId === vehicleId && subasta.activa
         );
     };
@@ -277,7 +277,7 @@ const MisVehiculos = () => {
                                     <p>ID: {vehicle.id}</p>
                                     <p>Precio Base: ${vehicle.precio_base}</p>
                                     <p>Estado: {vehicle.estado ? 'Disponible' : 'No disponible'}</p>
-                                    {vehicle.fecha && <p>Fecha: {new Date(vehicle.fecha).toLocaleDateString()}</p>}
+                                    {vehicle.fecha && <p>Fecha: {vehicle.fecha}</p>}
                                     {vehicleInAuction && (
                                         <p className="text-orange-600 font-medium mt-2">
                                             Este vehículo está actualmente en subasta
@@ -287,11 +287,10 @@ const MisVehiculos = () => {
                                 <div className="flex justify-end space-x-2">
                                     <button
                                         onClick={() => handleEdit(vehicle)}
-                                        className={`py-1 px-3 rounded transition-colors ${
-                                            vehicleInAuction
+                                        className={`py-1 px-3 rounded transition-colors ${vehicleInAuction
                                                 ? 'bg-gray-400 cursor-not-allowed'
                                                 : 'bg-blue-500 hover:bg-blue-600 text-white'
-                                        }`}
+                                            }`}
                                         disabled={vehicleInAuction}
                                         title={vehicleInAuction ? 'No se puede editar mientras está en subasta' : 'Editar'}
                                     >
@@ -299,11 +298,10 @@ const MisVehiculos = () => {
                                     </button>
                                     <button
                                         onClick={() => handleDelete(vehicle.id)}
-                                        className={`py-1 px-3 rounded transition-colors ${
-                                            vehicleInAuction
+                                        className={`py-1 px-3 rounded transition-colors ${vehicleInAuction
                                                 ? 'bg-gray-400 cursor-not-allowed'
                                                 : 'bg-red-500 hover:bg-red-600 text-white'
-                                        }`}
+                                            }`}
                                         disabled={vehicleInAuction}
                                         title={vehicleInAuction ? 'No se puede eliminar mientras está en subasta' : 'Eliminar'}
                                     >
