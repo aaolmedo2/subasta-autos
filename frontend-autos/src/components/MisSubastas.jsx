@@ -30,7 +30,7 @@ const MisSubastas = () => {
 
                 // Cargar vehículos del vendedor
                 const vehiclesData = await vehicleService.getVehiclesByVendedor(vendedorId);
-                
+
                 // Cargar subastas activas
                 const subastasData = await subastaService.getActiveSubastasByVendedor(vendedorId);
                 const subastasActivas = Array.isArray(subastasData) ? subastasData : [];
@@ -38,14 +38,14 @@ const MisSubastas = () => {
 
                 // Filtrar vehículos que no están en subasta activa
                 const autosEnSubasta = subastasActivas.map(subasta => subasta.autoId);
-                const availableVehicles = vehiclesData.filter(vehicle => 
+                const availableVehicles = vehiclesData.filter(vehicle =>
                     !vehicle.estado && !autosEnSubasta.includes(vehicle.id)
                 );
-                
+
                 if (vehiclesData.length > 0 && availableVehicles.length === 0) {
                     toast.info('Todos tus vehículos disponibles ya están en subasta');
                 }
-                
+
                 setVehicles(availableVehicles);
                 setLoading(false);
             } catch (err) {
@@ -64,7 +64,7 @@ const MisSubastas = () => {
         const vehicleId = e.target.value;
         const vehicle = vehicles.find(v => v.id === parseInt(vehicleId));
         setSelectedVehicle(vehicle);
-        
+
         if (vehicle) {
             setFormData(prev => ({
                 ...prev,
@@ -117,12 +117,12 @@ const MisSubastas = () => {
             };
 
             await subastaService.crearSubasta(subastaData);
-            
+
             // Recargar subastas
             const vendedorId = authService.getCurrentUserId();
             const subastasActualizadas = await subastaService.getActiveSubastasByVendedor(vendedorId);
             setSubastas(Array.isArray(subastasActualizadas) ? subastasActualizadas : []);
-            
+
             // Limpiar formulario
             setFormData({
                 autoId: '',
@@ -140,6 +140,22 @@ const MisSubastas = () => {
     if (!hasRole('ROLE_VENDEDOR')) {
         return <Navigate to="/" replace />;
     }
+
+    const handleDelete = async (id) => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar esta subasta?')) {
+            try {
+                await subastaService.deleteSubasta(id);
+                toast.success('Subasta eliminada con éxito!');
+                // Refrescar subastas filtrando la lista actual
+                setSubastas(prevSubastas => prevSubastas.filter(subasta => subasta.id !== id));
+
+
+            } catch (err) {
+                console.error('Error al eliminar la subasta:', err);
+                toast.error('Error al eliminar la subasta');
+            }
+        }
+    };
 
     if (loading) {
         return (
@@ -163,7 +179,7 @@ const MisSubastas = () => {
                 pauseOnHover
                 theme="colored"
             />
-            
+
             <h2 className="text-2xl font-bold mb-6">Gestión de Subastas</h2>
 
             {error && (
@@ -210,7 +226,7 @@ const MisSubastas = () => {
                                 />
                             </div>
 
-                            
+
                         )}
 
                         <div>
@@ -279,6 +295,14 @@ const MisSubastas = () => {
                                     <p>Fecha Fin: {subasta.fechaFin}</p>
                                     <p>Estado: {subasta.activa ? 'Activa' : 'Finalizada'}</p>
                                     {subasta.ganadorId && <p>Ganador ID: {subasta.ganadorId}</p>}
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        onClick={() => handleDelete(subasta.id)}
+                                        className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors"
+                                    >
+                                        Eliminar
+                                    </button>
                                 </div>
                             </div>
                         </div>

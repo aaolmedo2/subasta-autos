@@ -5,6 +5,7 @@ import ec.edu.espe.subasta.autos.api.DTO.SubastaDTOc;
 import ec.edu.espe.subasta.autos.entity.AutoEntity;
 import ec.edu.espe.subasta.autos.entity.PujaEntity;
 import ec.edu.espe.subasta.autos.entity.SubastaEntity;
+import ec.edu.espe.subasta.autos.exception.DeleteException;
 import ec.edu.espe.subasta.autos.repository.AutoRepository;
 import ec.edu.espe.subasta.autos.repository.PujaRepository;
 import ec.edu.espe.subasta.autos.repository.SubastaRepository;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +24,9 @@ public class SubastaService {
     private final SubastaRepository subastaRepository;
     private final AutoRepository autoRepository;
     private final PujaRepository pujaRepository;
+
+    private String msgError;
+
 
     public SubastaService(SubastaRepository subastaRepository, AutoRepository autoRepository, PujaRepository pujaRepository) {
         this.subastaRepository = subastaRepository;
@@ -61,14 +66,14 @@ public class SubastaService {
                 .collect(Collectors.toList());
     }
 
-    public List<SubastaDTO> obtenerSubastasActivasMine(Long vendedorId) {
+    public List<SubastaDTOc> obtenerSubastasActivasMine(Long vendedorId) {
         try {
             // Obtener las subastas activas del vendedor desde el repositorio
             List<SubastaEntity> subastasActivas = subastaRepository.findSubastasActivasByVendedorId(vendedorId);
 
             // Convertir las entidades a DTOs
             return subastasActivas.stream()
-                    .map(this::convertToDTO)
+                    .map(this::convertToDTOc)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Error al obtener las subastas del vendedor", e);
@@ -146,6 +151,25 @@ public class SubastaService {
             dto.setGanadorId(entity.getGanador().getId());
         }
         return dto;
+    }
+
+    //delete subasta
+    public void delete(SubastaDTOc subastaDTOc) throws DeleteException {
+        try{
+            Optional<SubastaEntity> subastaEntityOptional = this.subastaRepository.findById(subastaDTOc.getId());
+
+            if(!subastaEntityOptional.isPresent()){
+                this.msgError = "No se puede eliminar el subasta";
+                throw new DeleteException(this.msgError, SubastaEntity.class.getName());
+            }
+
+            this.subastaRepository.delete(subastaEntityOptional.get());
+
+
+        } catch (Exception exception) {
+            this.msgError = this.msgError == null ? "Error deleting subasta" : this.msgError;
+            throw new DeleteException(this.msgError, SubastaEntity.class.getName());
+        }
     }
 
 } 

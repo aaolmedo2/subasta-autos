@@ -1,6 +1,9 @@
 package ec.edu.espe.subasta.autos.api;
 
+import ec.edu.espe.subasta.autos.api.DTO.AutoDTO;
 import ec.edu.espe.subasta.autos.api.DTO.SubastaDTO;
+import ec.edu.espe.subasta.autos.api.DTO.SubastaDTOc;
+import ec.edu.espe.subasta.autos.exception.DeleteException;
 import ec.edu.espe.subasta.autos.service.SubastaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,5 +54,12 @@ public class SubastaController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    // Delete subasta
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteSubasta(SubastaDTOc subastaDTOc) throws DeleteException {
+        subastaService.delete(subastaDTOc);
+        return ResponseEntity.ok().build();
     }
 } 

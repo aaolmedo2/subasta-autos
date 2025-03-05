@@ -300,6 +300,17 @@ export const subastaService = {
             console.error('Error finalizando subasta:', error);
             throw error;
         }
+    },
+
+    deleteSubasta: async (id) => {
+        try {
+            console.log('Deleting subasta with ID:', id);
+            const response = await api.delete(`/subasta/delete/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting subasta:', error);
+            throw error;
+        }
     }
 };
 
