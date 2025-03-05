@@ -35,3 +35,7 @@ build/
 application.properties
 src/main/resources/application.properties
 application-prod.properties
+
+frontend-autos/node_modules/.bin/acorn
+
+frontend-autos/node_modules/
