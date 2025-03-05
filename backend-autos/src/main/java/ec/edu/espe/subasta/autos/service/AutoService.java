@@ -11,6 +11,7 @@ import ec.edu.espe.subasta.autos.repository.AutoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -207,6 +208,15 @@ public class AutoService {
 
         } catch (Exception e) {
             throw new RuntimeException("Error al obtener los autos del vendedor", e);
+        }
+    }
+
+    @Transactional
+    public void asignarAutoToComprador(Integer autoId, Integer compradorId) {
+        try {
+            autoRepository.asignarAutoToComprador(autoId, compradorId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al asignar el auto al comprador", e);
         }
     }
 
