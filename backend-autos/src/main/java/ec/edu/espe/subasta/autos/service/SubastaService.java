@@ -40,7 +40,7 @@ public class SubastaService {
         AutoEntity auto = autoRepository.findById(subastaDTO.getAutoId())
                 .orElseThrow(() -> new RuntimeException("Auto no encontrado"));
 
-        if (auto.getVendido()) {
+        if (!auto.getVendido()) {
             throw new RuntimeException("El auto ya está vendido");
         }
 

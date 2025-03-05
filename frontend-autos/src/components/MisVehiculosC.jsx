@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { vehicleService, authService } from '../services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import MisSubastas from './MisSubastas';
 
 const MisVehiculosC = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -72,10 +73,12 @@ const MisVehiculosC = () => {
                             <h3 className="text-xl font-semibold mb-2">{vehicle.marca} {vehicle.modelo}</h3>
                             <div className="text-gray-600 mb-4">
                                 <p>Año: {vehicle.anio}</p>
-                                <p>ID Auto: {vehicle.id}</p>
+                                <p>ID Auto: {vehicle.id}</p>                   
+                                 {/*
                                 <p>Precio COMPRA: ${vehicle.precio_base}</p>
                                 <p>Estado COMPRADO: {vehicle.estado ? 'Disponible' : 'No disponible'}</p>
                                 {vehicle.fecha && <p>Fecha COMPRA: {new Date(vehicle.fecha).toLocaleDateString()}</p>}
+                                */}
                             </div>
                         </div>
                     </div>
