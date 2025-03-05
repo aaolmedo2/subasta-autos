@@ -90,4 +90,16 @@ public class AutoController {
         return ResponseEntity.ok(autoService.getVehicleById(id));
     }
 
+    @PutMapping("/asignar/{autoId}/comprador/{compradorId}")
+    public ResponseEntity<?> asignarAutoToComprador(
+            @PathVariable Integer autoId,
+            @PathVariable Integer compradorId) {
+        try {
+            autoService.asignarAutoToComprador(autoId, compradorId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

@@ -102,11 +102,23 @@ public class SubastaService {
                 AutoEntity auto = subasta.getAuto();
                 auto.setVendido(true);
                 autoRepository.save(auto);
+
+                // Asignar el auto al comprador ganador
+                asignarAutoToComprador(auto.getId(), pujaGanadora.getComprador().getId());
             }
         }
 
         subasta.setActiva(false);
         subastaRepository.save(subasta);
+    }
+
+    @Transactional
+    public void asignarAutoToComprador(Integer autoId, Integer compradorId) {
+        try {
+            autoRepository.asignarAutoToComprador(autoId, compradorId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al asignar el auto al comprador", e);
+        }
     }
 
     @Scheduled(cron = "0 0 * * * *") // Ejecutar cada hora
