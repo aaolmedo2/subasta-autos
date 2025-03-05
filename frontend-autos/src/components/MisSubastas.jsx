@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { subastaService, authService, vehicleService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Route } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ToastContainer } from 'react-toastify';
 
@@ -131,6 +131,8 @@ const MisSubastas = () => {
                 precioMinimo: ''
             });
             setSelectedVehicle(null);
+
+            
         } catch (err) {
             console.error('Error al crear la subasta:', err);
             setError(err.message || 'Error al crear la subasta');

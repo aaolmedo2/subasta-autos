@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { vehicleService, authService } from '../services/api';
+import { vehicleService, authService, subastaService } from '../services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -18,6 +18,7 @@ const MisVehiculos = () => {
         id_vendedor: ''
     });
     const [currentUserId, setCurrentUserId] = useState(null);
+    const [subastasActivas, setSubastasActivas] = useState([]);
 
     useEffect(() => {
         // Obtener el ID del usuario actual desde el token JWT
@@ -26,25 +27,36 @@ const MisVehiculos = () => {
         setCurrentUserId(userId);
 
         if (userId) {
-            loadVehicles(userId);
+            loadData(userId);
         } else {
             setError('No se pudo obtener el ID del usuario');
             setLoading(false);
         }
     }, []);
 
-    const loadVehicles = async (vendedorId) => {
+    const loadData = async (vendedorId) => {
         try {
-            console.log('Loading vehicles for vendedor ID:', vendedorId);
-            const data = await vehicleService.getVehiclesByVendedor(vendedorId);
-            console.log('Vehículos cargados:', data);
-            setVehicles(data);
+            // Cargar vehículos
+            const vehiclesData = await vehicleService.getVehiclesByVendedor(vendedorId);
+            
+            // Cargar subastas activas
+            const subastasData = await subastaService.getActiveSubastasByVendedor(vendedorId);
+            setSubastasActivas(Array.isArray(subastasData) ? subastasData : []);
+            
+            setVehicles(vehiclesData);
             setLoading(false);
         } catch (err) {
-            console.error('Error al cargar los vehículos:', err);
-            toast.error('Error al cargar los vehículos');
+            console.error('Error al cargar los datos:', err);
+            toast.error('Error al cargar los datos');
             setLoading(false);
         }
+    };
+
+    // Función para verificar si un vehículo está en subasta activa
+    const isVehicleInAuction = (vehicleId) => {
+        return subastasActivas.some(subasta => 
+            subasta.autoId === vehicleId && subasta.activa
+        );
     };
 
     const handleInputChange = (e) => {
@@ -95,7 +107,7 @@ const MisVehiculos = () => {
             }
 
             if (currentUserId) {
-                await loadVehicles(currentUserId);
+                await loadData(currentUserId);
             }
             resetForm();
         } catch (err) {
@@ -124,7 +136,7 @@ const MisVehiculos = () => {
                 await vehicleService.deleteVehicle(id);
                 toast.success('¡Vehículo eliminado con éxito!');
                 if (currentUserId) {
-                    await loadVehicles(currentUserId);
+                    await loadData(currentUserId);
                 }
             } catch (err) {
                 console.error('Error al eliminar el vehículo:', err);
@@ -251,38 +263,57 @@ const MisVehiculos = () => {
 
             {/* Lista de vehículos */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {vehicles.map((vehicle) => (
-                    <div
-                        key={vehicle.id_vendedor}
-
-                        className="bg-white rounded-lg shadow-md overflow-hidden"
-                    >
-                        <div className="p-6">
-                            <h3 className="text-xl font-semibold mb-2">{vehicle.marca} {vehicle.modelo}</h3>
-                            <div className="text-gray-600 mb-4">
-                                <p>Año: {vehicle.anio}</p>
-                                <p>ID: {vehicle.id}</p>
-                                <p>Precio Base: ${vehicle.precio_base}</p>
-                                <p>Estado: {vehicle.estado ? 'Disponible' : 'No disponible'}</p>
-                                {vehicle.fecha && <p>Fecha: {new Date(vehicle.fecha).toLocaleDateString()}</p>}
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                                <button
-                                    onClick={() => handleEdit(vehicle)}
-                                    className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 transition-colors"
-                                >
-                                    Editar
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(vehicle.id)}
-                                    className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 transition-colors"
-                                >
-                                    Eliminar
-                                </button>
+                {vehicles.map((vehicle) => {
+                    const vehicleInAuction = isVehicleInAuction(vehicle.id);
+                    return (
+                        <div
+                            key={vehicle.id}
+                            className="bg-white rounded-lg shadow-md overflow-hidden"
+                        >
+                            <div className="p-6">
+                                <h3 className="text-xl font-semibold mb-2">{vehicle.marca} {vehicle.modelo}</h3>
+                                <div className="text-gray-600 mb-4">
+                                    <p>Año: {vehicle.anio}</p>
+                                    <p>ID: {vehicle.id}</p>
+                                    <p>Precio Base: ${vehicle.precio_base}</p>
+                                    <p>Estado: {vehicle.estado ? 'Disponible' : 'No disponible'}</p>
+                                    {vehicle.fecha && <p>Fecha: {new Date(vehicle.fecha).toLocaleDateString()}</p>}
+                                    {vehicleInAuction && (
+                                        <p className="text-orange-600 font-medium mt-2">
+                                            Este vehículo está actualmente en subasta
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        onClick={() => handleEdit(vehicle)}
+                                        className={`py-1 px-3 rounded transition-colors ${
+                                            vehicleInAuction
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                        }`}
+                                        disabled={vehicleInAuction}
+                                        title={vehicleInAuction ? 'No se puede editar mientras está en subasta' : 'Editar'}
+                                    >
+                                        Editar
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(vehicle.id)}
+                                        className={`py-1 px-3 rounded transition-colors ${
+                                            vehicleInAuction
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-red-500 hover:bg-red-600 text-white'
+                                        }`}
+                                        disabled={vehicleInAuction}
+                                        title={vehicleInAuction ? 'No se puede eliminar mientras está en subasta' : 'Eliminar'}
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
