@@ -277,7 +277,7 @@ const MisVehiculos = () => {
                                     <p>ID: {vehicle.id}</p>
                                     <p>Precio Base: ${vehicle.precio_base}</p>
                                     <p>Estado: {vehicle.estado ? 'Disponible' : 'No disponible'}</p>
-                                    {vehicle.fecha && <p>Fecha: {new Date(vehicle.fecha).toLocaleDateString()}</p>}
+                                    {vehicle.fecha && <p>Fecha: {vehicle.fecha}</p>}
                                     {vehicleInAuction && (
                                         <p className="text-orange-600 font-medium mt-2">
                                             Este vehículo está actualmente en subasta
