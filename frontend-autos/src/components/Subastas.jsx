@@ -218,7 +218,7 @@ const Subastas = () => {
                                         <CountdownTimer
                                             fechaFin={subasta.fechaFin}
                                             onTimeUp={handleTimeUp}
-                                            subastaId={subasta.autoId}
+                                            subastaId={subasta.id}
                                         />
                                     </div>
                                 )}
@@ -272,7 +272,7 @@ const Subastas = () => {
                                         <CountdownTimer
                                             fechaFin={selectedSubasta.fechaFin}
                                             onTimeUp={handleTimeUp}
-                                            subastaId={selectedSubasta.autoId}
+                                            subastaId={selectedSubasta.id}
                                         />
                                     </div>
                                 )}

@@ -3,6 +3,7 @@ import { subastaService, authService, vehicleService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 
 const MisSubastas = () => {
     const [subastas, setSubastas] = useState([]);
@@ -150,6 +151,19 @@ const MisSubastas = () => {
 
     return (
         <div className="container mx-auto px-4">
+            <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
+            
             <h2 className="text-2xl font-bold mb-6">Gestión de Subastas</h2>
 
             {error && (
@@ -261,8 +275,8 @@ const MisSubastas = () => {
                                 <div className="text-gray-600 mb-4">
                                     <p>Auto ID: {subasta.autoId}</p>
                                     <p>Precio Mínimo: ${subasta.precioMinimo}</p>
-                                    <p>Fecha Inicio: {new Date(subasta.fechaInicio).toLocaleDateString()}</p>
-                                    <p>Fecha Fin: {new Date(subasta.fechaFin).toLocaleDateString()}</p>
+                                    <p>Fecha Inicio: {subasta.fechaInicio} </p>
+                                    <p>Fecha Fin: {subasta.fechaFin}</p>
                                     <p>Estado: {subasta.activa ? 'Activa' : 'Finalizada'}</p>
                                     {subasta.ganadorId && <p>Ganador ID: {subasta.ganadorId}</p>}
                                 </div>
