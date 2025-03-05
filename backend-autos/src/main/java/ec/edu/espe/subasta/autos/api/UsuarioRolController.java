@@ -21,6 +21,7 @@ public class UsuarioRolController {
 
     private static final Logger logger = LoggerFactory.getLogger(AutoController.class);
 
+    private static final int ROL_VENDEDOR_ID = 1; // ID fijo para el rol "vendedor"
 
     public UsuarioRolController(UsuarioRolService usuarioRolService) {
         this.usuarioRolService = usuarioRolService;
@@ -66,6 +67,16 @@ public class UsuarioRolController {
             return ResponseEntity.ok().body(userRoles);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error al obtener usuarios y roles: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/asignar/{userId}")
+    public ResponseEntity<String> assignSellerRole(@PathVariable Integer userId) {
+        try {
+            usuarioRolService.assignNewRoleToUser(userId, ROL_VENDEDOR_ID);
+            return ResponseEntity.ok("Rol 'vendedor' asignado correctamente al usuario con ID " + userId);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

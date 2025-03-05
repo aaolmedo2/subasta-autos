@@ -155,5 +155,38 @@ public class UsuarioRolService {
         }
     }
 
+    // ASIGNAR ROL A UN USUARIO
+    public void assignNewRoleToUser(Integer userId, Integer roleId) throws InsertException {
+        try {
+            // Validar si el usuario ya tiene el rol asignado
+            if (usuarioRolRepository.existsByUsuarioIdAndRolId(userId, roleId)) {
+                throw new InsertException("El usuario ya tiene asignado el rol de vendedor", UsuariosRoleEntity.class.getName());
+            }
+
+            // Buscar usuario en la BD
+            UsuarioEntity usuario = usuarioRepository.findById(userId)
+                    .orElseThrow(() -> new InsertException("Usuario no encontrado en la DB", UsuarioEntity.class.getName()));
+
+            // Buscar el rol "vendedor" en la BD
+            RoleEntity rol = rolRepository.findById(roleId)
+                    .orElseThrow(() -> new InsertException("Rol no encontrado", RoleEntity.class.getName()));
+
+            // Crear la relación usuario-rol
+            UsuariosRoleEntityId compositeId = new UsuariosRoleEntityId(userId, roleId);
+            UsuariosRoleEntity usuarioRol = new UsuariosRoleEntity();
+            usuarioRol.setId(compositeId);
+            usuarioRol.setUsuario(usuario);
+            usuarioRol.setRol(rol);
+
+            // Guardar en la BD
+            usuarioRolRepository.save(usuarioRol);
+
+        } catch (InsertException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new InsertException("Error al asignar el rol de vendedor", UsuariosRoleEntity.class.getName());
+        }
+    }
+
 }
 
