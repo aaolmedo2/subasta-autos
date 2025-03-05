@@ -11,14 +11,14 @@ export const AuthProvider = ({ children }) => {
     const updateUserAndRoles = () => {
         try {
             const userRoles = authService.getCurrentUserRoles();
-            console.log('Updated user roles:', userRoles);
+            //console.log('Updated user roles:', userRoles);
 
             if (userRoles && userRoles.length > 0) {
                 setRoles(userRoles);
                 setUser({ roles: userRoles });
-                console.log('User and roles updated:', { roles: userRoles });
+                //console.log('User and roles updated:', { roles: userRoles });
             } else {
-                console.log('No roles found, clearing user state');
+                //console.log('No roles found, clearing user state');
                 setRoles([]);
                 setUser(null);
             }
@@ -28,16 +28,16 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        console.log('AuthProvider mounted, checking for existing token');
+        //console.log('AuthProvider mounted, checking for existing token');
         updateUserAndRoles();
         setLoading(false);
     }, []);
 
     const login = async (credentials) => {
         try {
-            console.log('Login attempt with credentials:', credentials);
+            //console.log('Login attempt with credentials:', credentials);
             const response = await authService.login(credentials);
-            console.log('Login successful, updating user state');
+            //console.log('Login successful, updating user state');
 
             // Pequeño retraso para asegurar que el token se guarde antes de actualizar el estado
             setTimeout(() => {
@@ -53,9 +53,9 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         try {
-            console.log('Register attempt with data:', userData);
+            //console.log('Register attempt with data:', userData);
             const response = await authService.register(userData);
-            console.log('Register successful');
+            //console.log('Register successful');
             return response;
         } catch (error) {
             console.error('Register failed:', error);
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        console.log('Logging out, clearing user state');
+        //console.log('Logging out, clearing user state');
         authService.logout();
         setUser(null);
         setRoles([]);

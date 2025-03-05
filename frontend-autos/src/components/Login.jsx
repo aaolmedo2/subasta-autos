@@ -25,7 +25,7 @@ const Login = () => {
 
         try {
             const response = await login(credentials);
-            console.log('Login successful:', response);
+            //console.log('Login successful:', response);
 
             setTimeout(() => {
                 navigate('/dashboard');

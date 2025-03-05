@@ -12,7 +12,7 @@ const MisVehiculosC = () => {
     useEffect(() => {
         // Obtener el ID del usuario actual desde el token JWT
         const userId = authService.getCurrentUserId();
-        console.log('Current user ID:', userId);
+        //console.log('Current user ID:', userId);
         setCurrentUserId(userId);
 
         if (userId) {
@@ -25,9 +25,9 @@ const MisVehiculosC = () => {
 
     const loadVehicles = async (vendedorId) => {
         try {
-            console.log('Loading vehicles for vendedor ID:', vendedorId);
+            //console.log('Loading vehicles for vendedor ID:', vendedorId);
             const data = await vehicleService.getVehiclesByVendedor(vendedorId);
-            console.log('Vehículos cargados:', data);
+            //console.log('Vehículos cargados:', data);
             setVehicles(data);
             setLoading(false);
         } catch (err) {
@@ -73,8 +73,8 @@ const MisVehiculosC = () => {
                             <h3 className="text-xl font-semibold mb-2">{vehicle.marca} {vehicle.modelo}</h3>
                             <div className="text-gray-600 mb-4">
                                 <p>Año: {vehicle.anio}</p>
-                                <p>ID Auto: {vehicle.id}</p>                   
-                                 {/*
+                                <p>ID Auto: {vehicle.id}</p>
+                                {/*
                                 <p>Precio COMPRA: ${vehicle.precio_base}</p>
                                 <p>Estado COMPRADO: {vehicle.estado ? 'Disponible' : 'No disponible'}</p>
                                 {vehicle.fecha && <p>Fecha COMPRA: {new Date(vehicle.fecha).toLocaleDateString()}</p>}

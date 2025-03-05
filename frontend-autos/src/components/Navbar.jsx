@@ -82,7 +82,7 @@ const Navbar = () => {
     const handleBecomeSeller = async () => {
         try {
             const userId = authService.getCurrentUserId();
-            console.log('Current user ID:', userId);
+            //console.log('Current user ID:', userId);
 
             if (!userId) {
                 toast.error('No se pudo obtener el ID del usuario');

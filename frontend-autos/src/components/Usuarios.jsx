@@ -13,7 +13,7 @@ const Usuarios = () => {
     const loadUsers = async () => {
         try {
             const data = await userService.getAllUsers();
-            console.log('Usuarios cargados:', data);
+            //console.log('Usuarios cargados:', data);
             setUsers(data);
             setLoading(false);
         } catch (err) {

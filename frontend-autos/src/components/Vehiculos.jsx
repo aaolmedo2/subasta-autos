@@ -23,7 +23,7 @@ const Vehiculos = () => {
     const loadVehicles = async () => {
         try {
             const data = await vehicleService.getAllVehicles();
-            console.log('Vehículos cargados:', data);
+            //console.log('Vehículos cargados:', data);
             setVehicles(data);
             setLoading(false);
         } catch (err) {
@@ -141,9 +141,9 @@ const Vehiculos = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Fecha
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Acciones
-                            </th>
+                            </th> */}
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -171,7 +171,7 @@ const Vehiculos = () => {
                                         {vehicle.fecha ? new Date(vehicle.fecha).toLocaleDateString() : 'N/A'}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                {/* <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <button
                                         onClick={() => handleEdit(vehicle)}
                                         className="text-indigo-600 hover:text-indigo-900 mr-4"
@@ -184,7 +184,7 @@ const Vehiculos = () => {
                                     >
                                         Eliminar
                                     </button>
-                                </td>
+                                </td> */}
                             </tr>
                         ))}
                     </tbody>

@@ -64,7 +64,7 @@ const Subastas = () => {
     const loadSubastas = async () => {
         try {
             const data = await subastaService.getActiveSubastas();
-            console.log('Subastas cargadas:', data);
+            //console.log('Subastas cargadas:', data);
             setSubastas(data);
 
             // Cargar los detalles de todos los autos

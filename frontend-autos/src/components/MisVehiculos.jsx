@@ -23,7 +23,7 @@ const MisVehiculos = () => {
     useEffect(() => {
         // Obtener el ID del usuario actual desde el token JWT
         const userId = authService.getCurrentUserId();
-        console.log('Current user ID:', userId);
+        //console.log('Current user ID:', userId);
         setCurrentUserId(userId);
 
         if (userId) {
@@ -288,8 +288,8 @@ const MisVehiculos = () => {
                                     <button
                                         onClick={() => handleEdit(vehicle)}
                                         className={`py-1 px-3 rounded transition-colors ${vehicleInAuction
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-blue-500 hover:bg-blue-600 text-white'
                                             }`}
                                         disabled={vehicleInAuction}
                                         title={vehicleInAuction ? 'No se puede editar mientras está en subasta' : 'Editar'}
@@ -299,8 +299,8 @@ const MisVehiculos = () => {
                                     <button
                                         onClick={() => handleDelete(vehicle.id)}
                                         className={`py-1 px-3 rounded transition-colors ${vehicleInAuction
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-red-500 hover:bg-red-600 text-white'
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-red-500 hover:bg-red-600 text-white'
                                             }`}
                                         disabled={vehicleInAuction}
                                         title={vehicleInAuction ? 'No se puede eliminar mientras está en subasta' : 'Eliminar'}

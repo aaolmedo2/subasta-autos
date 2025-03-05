@@ -86,7 +86,7 @@ const MisSubastas = () => {
         // Crear objetos Date a partir de las fechas seleccionadas
         const fechaInicioPartes = formData.fechaInicio.split('-');
         const fechaFinPartes = formData.fechaFin.split('-');
-    
+
         // Crear fechas usando el constructor Date(año, mes-1, día)
         const fechaInicio = new Date(
             parseInt(fechaInicioPartes[0]),
@@ -94,33 +94,33 @@ const MisSubastas = () => {
             parseInt(fechaInicioPartes[2])
         );
         fechaInicio.setHours(0, 0, 0, 0);
-    
+
         const fechaFin = new Date(
             parseInt(fechaFinPartes[0]),
             parseInt(fechaFinPartes[1]) - 1,
             parseInt(fechaFinPartes[2])
         );
         fechaFin.setHours(0, 0, 0, 0);
-    
+
         // Obtener la fecha actual y establecerla a medianoche
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-    
-        console.log('Fecha actual:', today.toLocaleDateString());
-        console.log('Fecha Inicio:', fechaInicio.toLocaleDateString());
-        console.log('Fecha Fin:', fechaFin.toLocaleDateString());
-    
+
+        //console.log('Fecha actual:', today.toLocaleDateString());
+        //console.log('Fecha Inicio:', fechaInicio.toLocaleDateString());
+        //console.log('Fecha Fin:', fechaFin.toLocaleDateString());
+
         // Comparar solo las fechas
         if (fechaInicio.getTime() < today.getTime()) {
             setError('La fecha de inicio no puede ser anterior a hoy');
             return false;
         }
-    
+
         if (fechaFin.getTime() <= fechaInicio.getTime()) {
             setError('La fecha de fin debe ser posterior a la fecha de inicio');
             return false;
         }
-    
+
         return true;
     };
 
