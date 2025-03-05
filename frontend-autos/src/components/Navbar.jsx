@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { userRolService, authService } from '../services/api';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Navbar = () => {
     const { user, roles, logout, hasRole } = useAuth();
     const navigate = useNavigate();
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
+    const [showCongrats, setShowCongrats] = useState(false);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -74,6 +78,49 @@ const Navbar = () => {
         const lastRole = readableRoles.pop();
         return `${readableRoles.join(', ')} y ${lastRole}`;
     };
+
+    const handleBecomeSeller = async () => {
+        try {
+            const userId = authService.getCurrentUserId();
+            console.log('Current user ID:', userId);
+
+            if (!userId) {
+                toast.error('No se pudo obtener el ID del usuario');
+                return;
+            }
+
+            await userRolService.assignSellerRole(userId);
+            setShowCongrats(true);
+
+            // Después de 3 segundos, cerrar sesión y redirigir
+            setTimeout(() => {
+                logout();
+                setShowCongrats(false);
+                navigate('/login');
+            }, 3000);
+
+        } catch (error) {
+            toast.error('Error al asignar el rol de vendedor');
+            console.error('Error:', error);
+        }
+    };
+
+    if (showCongrats) {
+        return (
+            <div className="fixed inset-0 bg-gray-800 flex items-center justify-center flex-col text-white">
+                <div className="text-center p-8 rounded-lg">
+                    <h1 className="text-4xl font-bold mb-4">¡Felicitaciones!</h1>
+                    <p className="text-xl mb-8">Ahora eres un vendedor en nuestra plataforma.</p>
+                    <p className="text-lg">Serás redirigido al inicio de sesión en unos segundos...</p>
+                    <div className="mt-8 animate-bounce">
+                        <svg className="w-16 h-16 mx-auto text-green-500" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <nav className="bg-gray-800">
@@ -153,14 +200,20 @@ const Navbar = () => {
                         <div className="ml-4 flex items-center md:ml-6">
                             {user ? (
                                 <div className="flex items-center space-x-4">
-
                                     <div className="text-gray-300 text-sm">
                                         <div>
                                             <b>Email:</b> {getUserEmail()}
                                         </div>
-                                        {/* <span>Roles: {roles.join(', ')}</span> */}
                                         <span><b>Roles:</b> {formatRoles()}</span>
                                     </div>
+                                    {hasRole('ROLE_COMPRADOR') && !hasRole('ROLE_VENDEDOR') && (
+                                        <button
+                                            onClick={handleBecomeSeller}
+                                            className="bg-green-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
+                                        >
+                                            Convertirse en Vendedor
+                                        </button>
+                                    )}
                                     <button
                                         onClick={handleLogout}
                                         className="text-black-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
