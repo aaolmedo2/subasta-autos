@@ -56,6 +56,7 @@ public class PujaService {
         Float ultimaPuja = pujaRepository.findMaxMontoBySubastaId(pujaDTO.getSubastaId());
         if (ultimaPuja != null && pujaDTO.getMonto() <= ultimaPuja) {
             throw new RuntimeException("La puja debe ser mayor a la última puja");
+
         }
 
         PujaEntity puja = new PujaEntity();

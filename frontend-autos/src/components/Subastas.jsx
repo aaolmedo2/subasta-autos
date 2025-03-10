@@ -136,7 +136,18 @@ const Subastas = () => {
             setError('');
         } catch (err) {
             console.error('Error al realizar puja:', err);
-            toast.error(err.message || 'Error al realizar la puja');
+            // Manejar los mensajes de error específicos del backend
+            if (err.response && err.response.data) {
+                if (err.response.data === "No puedes pujar por tu propio auto") {
+                    toast.error('⛔ No puedes pujar por tu propio auto');
+                } else if (err.response.data === "La puja debe ser mayor al precio mínimo") {
+                    toast.error(`💰 El monto debe ser mayor a $${selectedSubasta.subastaId.monto}`);
+                } else {
+                    toast.error(err.response.data);
+                }
+            } else {
+                toast.error('Error al realizar la puja');
+            }
         }
     };
 
@@ -164,7 +175,7 @@ const Subastas = () => {
         <div className="container mx-auto px-4">
             <ToastContainer
                 position="top-center"
-                autoClose={3000}
+                autoClose={5000}
                 hideProgressBar={false}
                 newestOnTop={false}
                 closeOnClick
@@ -173,6 +184,15 @@ const Subastas = () => {
                 draggable
                 pauseOnHover
                 theme="colored"
+                style={{ width: "400px" }}
+                toastStyle={{
+                    backgroundColor: "#fff",
+                    color: "#333",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    padding: "16px",
+                    fontSize: "16px"
+                }}
             />
             <h2 className="text-2xl font-bold mb-6">Subastas Activas</h2>
 
