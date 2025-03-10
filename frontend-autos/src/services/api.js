@@ -3,6 +3,7 @@ import axios from 'axios';
 // Cambiamos a URL relativa para usar el proxy de Vite
 const API_URL = '/api';
 
+
 const api = axios.create({
     baseURL: API_URL,
     headers: {
